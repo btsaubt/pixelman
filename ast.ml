@@ -52,6 +52,13 @@ let string_of_op = function
   | Geq -> ">="
   | And -> "&&"
   | Or -> "||"
+  | Divint -> "//"
+  | Mod -> "%"
+  | Shiftleft -> "<<"
+  | Shiftright -> ">>"
+  | Bitand -> "&"
+  | Bitor -> "|"
+  | Bitxor -> "^"
 
 let string_of_uop = function
     Neg -> "-"
