@@ -1,11 +1,11 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or
+          And | Or 
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Void
+type typ = Int | Bool | Float | String | List | Pixel | Image | Void 
 
 type bind = typ * string
 
@@ -86,6 +86,11 @@ let rec string_of_stmt = function
 let string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
+  | Float -> "float"
+  | String -> "string"
+  | List -> "list"
+  | Pixel -> "pixel"
+  | Image -> "image"
   | Void -> "void"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
