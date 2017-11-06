@@ -40,7 +40,6 @@ rule token = parse
 (* Data and Return Types *)
 | "char"   { CHAR }
 | "int"    { INT }
-| "float"  { FLOAT }
 | "bool"   { BOOL }
 | "list"   { LIST }
 | "string" { STRING }
@@ -50,8 +49,6 @@ rule token = parse
 
 (* Literals *)
 | ('-'?) ['0'-'9']+    as lxm    { INT_LITERAL(int_of_string lxm) }
-| ('-'?) ((['0'-'9']+ '.' ['0'-'9']*) | (['0'-'9']* '.' ['0'-'9']+)) 
-                       as lxm    { FLOAT_LITERAL(float_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | ''' character '''    as lxm    { CHAR_LITERAL(lxm.[1]) }
 | '"' (character*) '"' as lxm    { STRING_LITERAL(lxm) }
