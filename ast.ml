@@ -10,7 +10,10 @@ type typ = Int | Bool | Float | String | List | Pixel | Image | Void
 type bind = typ * string
 
 type expr =
-    Literal of int
+    Int_Literal of int
+  | Float_Literal of float
+  | Char_Literal of char
+  | String_Literal of string
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
@@ -96,8 +99,6 @@ let string_of_typ = function
   | Float -> "float"
   | String -> "string"
   | List -> "list"
-  | Pixel -> "pixel"
-  | Image -> "image"
   | Void -> "void"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
