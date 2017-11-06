@@ -2,9 +2,13 @@
 
 { open Parser }
 
+let character = [' '-'!' '#'-'[' ']'-'~'] | ('\\' ['\\' ''' '"' 'n' 'r' 't'])
+
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { comment lexbuf }           (* Comments *)
+
+    (* Operators and Separators *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
@@ -25,18 +29,29 @@ rule token = parse
 | "&&"     { AND }
 | "||"     { OR }
 | "!"      { NOT }
+
+(* Branching Control *)
 | "if"     { IF }
 | "else"   { ELSE }
 | "for"    { FOR }
 | "while"  { WHILE }
 | "return" { RETURN }
+
+(* Data and Return Types *)
+| "char"   { CHAR }
 | "int"    { INT }
 | "bool"   { BOOL }
+| "list"   { LIST }
+| "string" { STRING }
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
-| ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
+
+(* Literals *)
+| ('-'?) ['0'-'9']+    as lxm    { INT_LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+| ''' character '''    as lxm    { CHAR_LITERAL(lxm.[1]) }
+| '"' (character*) '"' as lxm    { STRING_LITERAL(lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
