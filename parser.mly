@@ -7,9 +7,11 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL VOID
+%token RETURN IF ELSE FOR WHILE INT BOOL VOID DEF MAIN
 %token <int> LITERAL
 %token <string> ID
+%token <char> CHAR
+%token <string> STRING 
 %token EOF
 
 %nonassoc NOELSE
@@ -55,6 +57,8 @@ formal_list:
 typ:
     INT { Int }
   | BOOL { Bool }
+  | CHAR { Char } 
+  | STRING { String } 
   | VOID { Void }
 
 vdecl_list:
