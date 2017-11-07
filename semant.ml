@@ -40,8 +40,17 @@ let check (globals, functions) =
 
   (**** Checking Functions ****)
 
-  if List.mem "print" (List.map (fun fd -> fd.fname) functions)
-  then raise (Failure ("function print may not be defined")) else ();
+  let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
+                                 "display"; "resize"; "transform"]
+
+  let rec check_protected check_list function_list = 
+    | [] -> []
+    | h :: t -> if List.mem h (List.map (fun fd -> fd.fname) functions) 
+        then raise (Failure ("function" ^ h ^ "may not be defined"))
+        else check_protected check_list t;
+
+  (*if List.mem "print" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function print may not be defined")) else ();*)
 
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
