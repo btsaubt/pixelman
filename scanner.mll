@@ -48,7 +48,7 @@ rule token = parse
 | "<<="    { LASSIGN } 
 | "&="     { ANDASSIGN } 
 | "!="     { NOTASSIGN } 
-
+| "//"     { DIVINT } 
 
 (* Branching Control *)
 | "if"       { IF }
