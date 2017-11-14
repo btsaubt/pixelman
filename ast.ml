@@ -1,7 +1,7 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or 
+          And | Or | Divint | Mod | Shiftleft | Shiftright | Bitand | Bitor | Bitxor
 
 type uop = Neg | Not
 
