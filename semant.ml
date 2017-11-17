@@ -42,11 +42,12 @@ let check (globals, functions) =
 
   let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
                                  "display"; "resize"; "transform"] in
-  let rec check_protected check_list function_list = function
-    [] -> []
-    | h :: t -> if List.mem h (List.map (fun fd -> fd.fname) functions) 
+  let rec check_protected function_list = function
+    [] -> ()
+    | h :: t -> if List.mem h (List.map (fun fd -> fd.fname) functions)
         then raise (Failure ("function" ^ h ^ "may not be defined"))
-        else check_protected check_list t;
+        else ignore (check_protected t)
+  in check_protected protected_functions;
 
   (*if List.mem "print" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function print may not be defined")) else ();*)
