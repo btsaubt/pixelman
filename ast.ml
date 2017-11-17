@@ -5,7 +5,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Float | String | List | Pixel | Image | Void 
+type typ = Int | Bool | Float | Char | String | Void 
 
 type bind = typ * string
 
@@ -68,7 +68,10 @@ let string_of_uop = function
   | Not -> "!"
 
 let rec string_of_expr = function
-    Int_Literal(l) -> string_of_int l
+    Int_Literal(i) -> string_of_int i
+  | Float_Literal(f) -> string_of_float f
+  | Char_Literal(c) -> Char.escaped c
+  | String_Literal(s) -> s
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | Id(s) -> s
@@ -96,9 +99,9 @@ let rec string_of_stmt = function
 let string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
+  | Char -> "char"
   | Float -> "float"
   | String -> "string"
-  | List -> "list"
   | Void -> "void"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"

@@ -41,10 +41,9 @@ let check (globals, functions) =
   (**** Checking Functions ****)
 
   let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
-                                 "display"; "resize"; "transform"]
-
-  let rec check_protected check_list function_list = 
-    | [] -> []
+                                 "display"; "resize"; "transform"] in
+  let rec check_protected check_list function_list = function
+    [] -> []
     | h :: t -> if List.mem h (List.map (fun fd -> fd.fname) functions) 
         then raise (Failure ("function" ^ h ^ "may not be defined"))
         else check_protected check_list t;
@@ -60,11 +59,11 @@ let check (globals, functions) =
      { typ = Void; fname = "print"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "printb"
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
-       locals = []; body = [] } (StringMap.singleton "printbig"
+       locals = []; body = [] } (StringMap.add "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] }))
+       locals = []; body = [] } (StringMap.singleton "print_string"
      { typ = Void; fname = "print_string"; formals = [(String, "x")];
-       locals = []; body = [] }))
+       locals = []; body = [] })))
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
