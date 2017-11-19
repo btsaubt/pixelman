@@ -1,7 +1,8 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or | Divint | Mod | Shiftleft | Shiftright | Bitand | Bitor | Bitxor
+          And | Or | Divint | Shiftleft | Shiftright | Bitand | Bitor | Bitxor |
+          Mod
 
 type uop = Neg | Not
 
@@ -29,6 +30,8 @@ type stmt =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
+  | Break
+  | Continue 
 
 type func_decl = {
     typ : typ;
@@ -95,7 +98,9 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-
+  (*| Break -> "break;" 
+  | Continue -> "continue;"
+*)
 let string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
@@ -107,7 +112,7 @@ let string_of_typ = function
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
-  string_of_typ fdecl.typ ^ " " ^
+  "def " ^ string_of_typ fdecl.typ ^ " " ^
   fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
   ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^

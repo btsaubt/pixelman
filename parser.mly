@@ -4,13 +4,15 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT 
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL VOID DEF MAIN STRING CHAR
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF MAIN STRING CHAR
+%token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
 %token <int> INT_LITERAL
 %token <string> ID
 %token <char> CHAR_LITERAL
+%token <float> FLOAT_LITERAL
 %token <string> STRING_LITERAL
 %token EOF
 
@@ -19,10 +21,14 @@ open Ast
 %right ASSIGN
 %left OR
 %left AND
+%left BITOR
+%left BITXOR
+%left BITAND 
 %left EQ NEQ
 %left LT GT LEQ GEQ
+%left LSHIFT RSHIFT 
 %left PLUS MINUS
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD DIVINT 
 %right NOT NEG
 
 %start program
@@ -39,12 +45,12 @@ decls:
  | decls fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
-     { { typ = $1;
-	 fname = $2;
-	 formals = $4;
-	 locals = List.rev $7;
-	 body = List.rev $8 } }
+   DEF typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
+     { { typ = $2;
+	 fname = $3;
+	 formals = $5;
+	 locals = List.rev $8;
+	 body = List.rev $9 } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -57,6 +63,7 @@ formal_list:
 typ:
     INT { Int }
   | BOOL { Bool }
+  | FLOAT { Float } 
   | CHAR { Char } 
   | STRING { String } 
   | VOID { Void }
@@ -90,6 +97,7 @@ expr_opt:
 expr:
     INT_LITERAL      { Int_Literal($1) }
   | STRING_LITERAL   { String_Literal($1) }
+  | FLOAT_LITERAL    { Float_Literal($1) } 
   | CHAR_LITERAL     { Char_Literal($1) } 
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
@@ -98,6 +106,8 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
+  | expr DIVINT expr { Binop($1, Divint,   $3) }
+  | expr MOD expr { Binop($1, Mod,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
@@ -106,9 +116,23 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
+  | expr LSHIFT expr { Binop($1, Shiftleft, $3) } 
+  | expr RSHIFT     expr { Binop($1, Shiftright, $3) } 
+  | expr BITAND     expr { Binop($1, Bitand, $3) } 
+  | expr BITOR      expr { Binop($1, Bitor, $3) } 
+  | expr BITXOR     expr { Binop($1, Bitxor, $3) } 
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | ID ASSIGN expr   { Assign($1, $3) }
+  /*| ID MULTASSIGN expr { Assign($1, $3) } 
+  | ID DIVASSIGN  expr { Assign($1, $3) } 
+  | ID PLUSASSIGN expr { Assign($1, $3) } 
+  | ID SUBASSIGN expr { Assign($1, $3) }
+  | ID RASSIGN expr { Assign($1, $3) }
+  | ID LASSIGN expr { Assign($1, $3) }
+  | ID ANDASSIGN expr { Assign($1, $3) }
+  | ID NOTASSIGN expr { Assign($1, $3) }
+*/
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
