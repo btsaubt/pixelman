@@ -6,7 +6,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Float | Char | String | Void 
+type typ = Int | Bool | Float | Char | String | Void | Image | Pixel 
 
 type bind = typ * string
 
@@ -98,9 +98,9 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-  (*| Break -> "break;" 
+  | Break -> "break;" 
   | Continue -> "continue;"
-*)
+
 let string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
@@ -108,6 +108,8 @@ let string_of_typ = function
   | Float -> "float"
   | String -> "string"
   | Void -> "void"
+  | Pixel -> "Pixel" 
+  | Image -> "Image" 
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

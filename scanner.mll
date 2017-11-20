@@ -16,6 +16,7 @@ rule token = parse
 | '}'      { RBRACE }
 | ';'      { SEMI }
 | ','      { COMMA }
+| ':'      { COLON } 
 | '+'      { PLUS }
 | '-'      { MINUS }
 | '*'      { TIMES }
@@ -55,6 +56,8 @@ rule token = parse
 | "else"     { ELSE }
 | "for"      { FOR }
 | "while"    { WHILE }
+| "continue" { CONTINUE } 
+| "break"    { BREAK } 
 | "return"   { RETURN }
 | "def"      { DEF } 
 | "main"     { MAIN } 
@@ -68,6 +71,8 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
+| "Pixel"  { PIXEL } 
+| "Image"  { IMAGE } 
 
 (* Literals *)
 | ('-'?) digit+    as lxm    { INT_LITERAL(int_of_string lxm) }
