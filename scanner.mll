@@ -70,6 +70,7 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
+| "null"   { NULL }
 | "Pixel"  { PIXEL } 
 | "Image"  { IMAGE } 
 

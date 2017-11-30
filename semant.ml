@@ -106,7 +106,6 @@ let check (globals, functions) =
         Int_Literal _ -> Int
       | String_Literal _ -> String
       | BoolLit _ -> Bool
-      | Null _ -> SNull
       | Id s -> type_of_identifier s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
