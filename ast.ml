@@ -111,7 +111,7 @@ let string_of_typ = function
   | Pixel -> "Pixel" 
   | Image -> "Image" 
 
-let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+let string_of_vdecl (t, id, expr, _) = string_of_typ t ^ " " ^ id ^ " " ^ (string_of_expr expr) ^ ";\n"
 
 let string_of_fdecl fdecl =
   "def " ^ string_of_typ fdecl.typ ^ " " ^

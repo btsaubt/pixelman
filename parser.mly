@@ -78,6 +78,7 @@ vdecl_list:
 
 vdecl:
    typ ID SEMI { ($1, $2) }
+  | typ ID EQ expr SEMI { Assign($2, $4) }
 
 stmt_list:
     /* nothing */  { [] }
