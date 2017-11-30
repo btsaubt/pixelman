@@ -17,6 +17,7 @@ type expr =
   | String_Literal of string
   | BoolLit of bool
   | Id of string
+  | Null
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Assign of string * expr
