@@ -60,7 +60,6 @@ rule token = parse
 | "break"    { BREAK } 
 | "return"   { RETURN }
 | "def"      { DEF } 
-| "main"     { MAIN } 
 
 (* Data and Return Types *)
 | "char"   { CHAR }

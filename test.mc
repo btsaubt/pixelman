@@ -1,4 +1,4 @@
-int main() {
+def int str_print() {
   int a;
   int b; 
   int c;
