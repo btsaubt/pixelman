@@ -16,6 +16,7 @@ IMAGE
 %token <char> CHAR_LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> STRING_LITERAL
+%token <string> ARRAY
 %token EOF
 
 %nonassoc NOELSE
@@ -71,6 +72,9 @@ typ:
   | VOID { Void }
   | PIXEL { Pixel } 
   | IMAGE { Image } 
+  | ARRAY { Array }
+
+
 
 vdecl_list:
     /* nothing */    { [] }

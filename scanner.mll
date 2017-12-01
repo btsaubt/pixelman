@@ -72,6 +72,7 @@ rule token = parse
 | "false"  { FALSE }
 | "Pixel"  { PIXEL } 
 | "Image"  { IMAGE } 
+| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']+('['']') as lxm  { ARRAY(lxm) }
 
 (* Literals *)
 | ('-'?) digit+    as lxm    { INT_LITERAL(int_of_string lxm) }
