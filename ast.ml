@@ -19,8 +19,10 @@ type expr =
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
-  | Assign of string * expr
+  | Assign of expr * expr
   | Call of string * expr list
+  | VecAccess of string * expr
+  | MatAccess of string * expr * expr
   | Noexpr
 
 type stmt =
@@ -81,9 +83,12 @@ let rec string_of_expr = function
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
+  | Assign(e1, e2) -> string_of_expr e1  ^ " = " ^ string_of_expr e2
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
+  | MatAccess(v, e1, e2) -> v ^ "[" ^ string_of_expr e1 ^ "]" ^ 
+                                "[" ^ string_of_expr e2 ^ "]"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -112,6 +117,10 @@ let string_of_typ = function
   | Image -> "Image" 
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+
+let string_of_vecdecl (t, id, e) = string_of_typ t ^ "[" ^ string_of_expr e ^ "] " ^ id ^ ";\n"
+
+let string_of_matdecl (t, id, e1, e2) = string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "] " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
   "def " ^ string_of_typ fdecl.typ ^ " " ^
