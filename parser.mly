@@ -75,9 +75,17 @@ typ:
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
+  | vdecl_list vecdecl { $2 :: $1 }
+  | vdecl_list matdecl { $2 :: $1 }
 
 vdecl:
    typ ID SEMI { ($1, $2) }
+
+vecdecl:
+   typ LBRACKET expr RBRACKET ID SEMI { ($1, $5, $3) }
+
+matdecl:
+   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET ID SEMI { ($1, $8, $3, $6) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -129,7 +137,7 @@ expr:
   | expr BITXOR     expr { Binop($1, Bitxor, $3) } 
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | expr ASSIGN expr   { Assign($1, $3) }
   /*| ID MULTASSIGN expr { Assign($1, $3) } 
   | ID DIVASSIGN  expr { Assign($1, $3) } 
   | ID PLUSASSIGN expr { Assign($1, $3) } 
@@ -141,6 +149,8 @@ expr:
 */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+  | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
+  | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) }
 
 actuals_opt:
     /* nothing */ { [] }
