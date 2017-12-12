@@ -20,6 +20,8 @@ IMAGE
 
 %nonassoc NOELSE
 %nonassoc ELSE
+$nonassoc NOVECLBRACKET
+%nonassoc LBRACKET
 %right ASSIGN
 %left OR
 %left AND
@@ -71,21 +73,21 @@ typ:
   | VOID { Void }
   | PIXEL { Pixel } 
   | IMAGE { Image } 
+  | vec_t { $1 }
+  | mat_t { $1 }
 
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
-  | vdecl_list vecdecl { $2 :: $1 }
-  | vdecl_list matdecl { $2 :: $1 }
 
 vdecl:
    typ ID SEMI { ($1, $2) }
 
-vecdecl:
-   typ LBRACKET expr RBRACKET ID SEMI { ($1, $5, $3) }
+vec_t:
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
 
-matdecl:
-   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET ID SEMI { ($1, $8, $3, $6) }
+mat_t:
+   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
 
 stmt_list:
     /* nothing */  { [] }

@@ -6,10 +6,6 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Float | Char | String | Void | Image | Pixel 
-
-type bind = typ * string
-
 type expr =
     Int_Literal of int
   | Float_Literal of float
@@ -24,6 +20,10 @@ type expr =
   | VecAccess of string * expr
   | MatAccess of string * expr * expr
   | Noexpr
+
+type typ = Int | Bool | Float | Char | String | Void | Image | Pixel | Vector of typ * expr | Matrix of typ * expr * expr
+
+type bind = typ * string
 
 type stmt =
     Block of stmt list
@@ -106,7 +106,7 @@ let rec string_of_stmt = function
   | Break -> "break;" 
   | Continue -> "continue;"
 
-let string_of_typ = function
+let rec string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
   | Char -> "char"
@@ -115,12 +115,10 @@ let string_of_typ = function
   | Void -> "void"
   | Pixel -> "Pixel" 
   | Image -> "Image" 
+  | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
+  | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
-
-let string_of_vecdecl (t, id, e) = string_of_typ t ^ "[" ^ string_of_expr e ^ "] " ^ id ^ ";\n"
-
-let string_of_matdecl (t, id, e1, e2) = string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "] " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
   "def " ^ string_of_typ fdecl.typ ^ " " ^
