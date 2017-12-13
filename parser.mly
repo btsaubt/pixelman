@@ -1,4 +1,4 @@
-/* Ocamlyacc parser for MicroC */
+/* Ocamlyacc parser for Pixelman */
 
 %{
 open Ast
@@ -139,7 +139,7 @@ expr:
   | expr BITXOR     expr { Binop($1, Bitxor, $3) } 
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | expr ASSIGN expr   { Assign($1, $3) }
+  | ID ASSIGN expr   { Assign($1, $3) }
   /*| ID MULTASSIGN expr { Assign($1, $3) } 
   | ID DIVASSIGN  expr { Assign($1, $3) } 
   | ID PLUSASSIGN expr { Assign($1, $3) } 

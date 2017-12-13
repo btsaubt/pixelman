@@ -15,7 +15,7 @@ type expr =
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
-  | Assign of expr * expr
+  | Assign of string * expr
   | Call of string * expr list
   | VecAccess of string * expr
   | MatAccess of string * expr * expr
@@ -83,7 +83,7 @@ let rec string_of_expr = function
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
-  | Assign(e1, e2) -> string_of_expr e1  ^ " = " ^ string_of_expr e2
+  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
