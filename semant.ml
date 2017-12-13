@@ -31,6 +31,8 @@ let check (globals, functions) =
   let check_assign lvaluet rvaluet err =
      if lvaluet == rvaluet then lvaluet else raise err
   in
+
+  let 
    
   (**** Checking Global Variables ****)
 
@@ -101,12 +103,20 @@ let check (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
+    let access_type = function
+      Vector(t, _) -> t
+      | Matrix(t, _, _) -> t
+      | _ -> raise (Failure ("illegal matrix/vector access"))
+    in
+
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
         Int_Literal _ -> Int
       | String_Literal _ -> String
       | BoolLit _ -> Bool
       | Id s -> type_of_identifier s
+      | VecAccess(v, e) -> access_type (type_of_identifier v)
+      | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v)
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
           Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
