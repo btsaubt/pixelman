@@ -9,6 +9,7 @@ open Ast
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL
 IMAGE
+%token NOVECLBRACKET
 %token BREAK CONTINUE
 %token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
 %token <int> INT_LITERAL
@@ -20,7 +21,7 @@ IMAGE
 
 %nonassoc NOELSE
 %nonassoc ELSE
-$nonassoc NOVECLBRACKET
+%nonassoc NOVECLBRACKET
 %nonassoc LBRACKET
 %right ASSIGN
 %left OR
@@ -33,7 +34,6 @@ $nonassoc NOVECLBRACKET
 %left LSHIFT RSHIFT 
 %left PLUS MINUS
 %left TIMES DIVIDE MOD DIVINT 
-%nonassoc LBRACKET RBRACKET
 %right NOT NEG
 
 %start program
@@ -119,8 +119,6 @@ expr:
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }
-  | PIXEL LPAREN expr expr expr expr expr RPAREN { Pixel($3, $4, $5, $6, $7) }
-  | IMAGE LPAREN expr expr RPAREN { Image($3, $4) } 
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
