@@ -19,11 +19,11 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Call of string * expr list
-  | VecAccess of string * expr
-  | MatAccess of string * expr * expr
+(*  | VecAccess of string * expr
+  | MatAccess of string * expr * expr *)
   | Noexpr
 
-type typ = Int | Bool | Float | Char | String | Void | Image | Pixel | Vector of typ * expr | Matrix of typ * expr * expr
+type typ = Int | Bool | Float | Char | String | Void | (*Image | Pixel |*) Vector of typ * expr | Matrix of typ * expr * expr
 
 type bind = typ * string
 
@@ -92,9 +92,9 @@ let rec string_of_expr = function
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-  | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
+(*  | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
   | MatAccess(v, e1, e2) -> v ^ "[" ^ string_of_expr e1 ^ "]" ^ 
-                                "[" ^ string_of_expr e2 ^ "]"
+                                "[" ^ string_of_expr e2 ^ "]" *)
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -119,8 +119,8 @@ let rec string_of_typ = function
   | Float -> "float"
   | String -> "string"
   | Void -> "void"
-  | Pixel -> "Pixel" 
-  | Image -> "Image" 
+  (*| Pixel -> "Pixel" 
+  | Image -> "Image" *)
   | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
   | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
 

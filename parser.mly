@@ -4,11 +4,12 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT COLON 
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON 
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL
 IMAGE
+%token NOVECLBRACKET
 %token BREAK CONTINUE
 %token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
 %token <int> INT_LITERAL
@@ -20,7 +21,7 @@ IMAGE
 
 %nonassoc NOELSE
 %nonassoc ELSE
-$nonassoc NOVECLBRACKET
+%nonassoc NOVECLBRACKET
 %nonassoc LBRACKET
 %right ASSIGN
 %left OR
@@ -33,7 +34,6 @@ $nonassoc NOVECLBRACKET
 %left LSHIFT RSHIFT 
 %left PLUS MINUS
 %left TIMES DIVIDE MOD DIVINT 
-%nonassoc LBRACKET RBRACKET
 %right NOT NEG
 
 %start program
@@ -72,8 +72,8 @@ typ:
   | CHAR { Char } 
   | STRING { String } 
   | VOID { Void }
-  | PIXEL { Pixel } 
-  | IMAGE { Image } 
+  /*| PIXEL { Pixel } 
+  | IMAGE { Image } */
   | vec_t { $1 }
   | mat_t { $1 }
 
@@ -85,7 +85,7 @@ vdecl:
    typ ID SEMI { ($1, $2) }
 
 vec_t:
-   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) } /* must be given precedence for no S/R errors */
 
 mat_t:
    typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
@@ -119,8 +119,6 @@ expr:
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }
-  | PIXEL LPAREN expr expr expr expr expr RPAREN { Pixel($3, $4, $5, $6, $7) }
-  | IMAGE LPAREN expr expr RPAREN { Image($3, $4) } 
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -154,8 +152,9 @@ expr:
 */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
-  | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
-  | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) }
+  /* | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
+  | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
+*/
 
 actuals_opt:
     /* nothing */ { [] }
