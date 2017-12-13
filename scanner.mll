@@ -1,14 +1,15 @@
-(* Ocamllex scanner for MicroC *)
+(* IOcamllex scanner for MicroC *)
 
 { open Parser }
 
 let character = [' '-'!' '#'-'[' ']'-'~'] | ('\\' ['\\' ''' '"' 'n' 'r' 't'])
 let digit = ['0'-'9']
+let whitespace = [' ' '\t' '\n' '\r'] 
 
 rule token = parse
-  [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| ":)"     { comment lexbuf }           (* Comments *)
-
+  whitespace { token lexbuf }             (* Whitespace *)
+  | ":)"     { comment lexbuf }           (* Comments *)
+  
     (* Operators and Separators *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
@@ -80,9 +81,10 @@ rule token = parse
 | '"' (character*) '"' as lxm    { STRING_LITERAL(lxm) }
 | ('-'?) (digit+) ['.'] digit+ as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
 
+(* Comment *) 
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and comment = parse
-  ":)" { token lexbuf }
-| _    { comment lexbuf }
+  | '\n' { token lexbuf }
+  | _    { comment lexbuf }
