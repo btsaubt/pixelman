@@ -31,6 +31,7 @@ IMAGE
 %left LSHIFT RSHIFT 
 %left PLUS MINUS
 %left TIMES DIVIDE MOD DIVINT 
+%nonassoc LBRACKET RBRACKET
 %right NOT NEG
 
 %start program
@@ -108,12 +109,14 @@ expr:
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }
+  | PIXEL LPAREN expr expr expr expr expr RPAREN { Pixel($3, $4, $5, $6, $7) }
+  | IMAGE LPAREN expr expr RPAREN { Image($3, $4) } 
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
   | expr DIVINT expr { Binop($1, Divint,   $3) }
-  | expr MOD expr { Binop($1, Mod,   $3) }
+  | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }

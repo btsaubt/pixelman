@@ -4,4 +4,6 @@ def int main() {
   string c;
   int d; :) hello 
   bool e;
+  Pixel r; 
+  Image x; 
 } 

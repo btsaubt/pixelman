@@ -1,4 +1,4 @@
-def int pattern_match_operators() {
+def int main() {
   int a;
   int b;
   a = 1;

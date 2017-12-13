@@ -1,4 +1,4 @@
-def int continue_break() { 
+def int main() { 
   int i;
   i = 0;
  

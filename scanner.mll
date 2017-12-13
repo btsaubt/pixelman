@@ -7,7 +7,7 @@ let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\n' '\r'] 
 
 rule token = parse
-  whitespace { token lexbuf } (* Whitespace *)
+  whitespace { token lexbuf }             (* Whitespace *)
   | ":)"     { comment lexbuf }           (* Comments *)
   
     (* Operators and Separators *)
@@ -82,7 +82,6 @@ rule token = parse
 | ('-'?) (digit+) ['.'] digit+ as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
 
 (* Comment *) 
-(*| ":)" { comment lexbuf }*) 
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
