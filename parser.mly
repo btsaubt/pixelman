@@ -20,6 +20,8 @@ IMAGE
 
 %nonassoc NOELSE
 %nonassoc ELSE
+$nonassoc NOVECLBRACKET
+%nonassoc LBRACKET
 %right ASSIGN
 %left OR
 %left AND
@@ -72,6 +74,8 @@ typ:
   | VOID { Void }
   | PIXEL { Pixel } 
   | IMAGE { Image } 
+  | vec_t { $1 }
+  | mat_t { $1 }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -79,6 +83,12 @@ vdecl_list:
 
 vdecl:
    typ ID SEMI { ($1, $2) }
+
+vec_t:
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
+
+mat_t:
+   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -132,7 +142,7 @@ expr:
   | expr BITXOR     expr { Binop($1, Bitxor, $3) } 
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | expr ASSIGN expr   { Assign($1, $3) }
   /*| ID MULTASSIGN expr { Assign($1, $3) } 
   | ID DIVASSIGN  expr { Assign($1, $3) } 
   | ID PLUSASSIGN expr { Assign($1, $3) } 
@@ -144,6 +154,8 @@ expr:
 */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+  | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
+  | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) }
 
 actuals_opt:
     /* nothing */ { [] }
