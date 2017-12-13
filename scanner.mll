@@ -1,4 +1,4 @@
-(* Ocamllex scanner for MicroC *)
+(* Ocamllex scanner for pixelman *)
 
 { open Parser }
 
@@ -9,37 +9,20 @@ rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | ":)"     { comment lexbuf }           (* Comments *)
 
-    (* Operators and Separators *)
+    (* Separators *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
 | ';'      { SEMI }
 | ','      { COMMA }
-| ':'      { COLON } 
-| '+'      { PLUS }
-| '-'      { MINUS }
-| '*'      { TIMES }
-| '/'      { DIVIDE }
-| '='      { ASSIGN }
-| "=="     { EQ }
-| "!="     { NEQ }
-| '<'      { LT }
-| "<="     { LEQ }
-| ">"      { GT }
-| ">="     { GEQ }
-| "&&"     { AND }
-| "||"     { OR }
-| "!"      { NOT }
-| "."      { DOT }
 | "["      { LBRACKET } 
 | "]"      { RBRACKET } 
-| "|"      { BITOR }
-| "%"      { MOD } 
-| "<<"     { LSHIFT } 
-| ">>"     { RSHIFT }
-| "&"      { BITAND }
-| "^"      { BITXOR } 
+(*| ':'      { COLON }
+| "."      { DOT } *)
+
+	(* Assignment Operators *)
+| '='      { ASSIGN }
 (*| "*="     { MULTASSIGN } 
 | "/="     { DIVASSIGN }
 | "%="     { MODASSIGN } 
@@ -49,9 +32,39 @@ rule token = parse
 | "<<="    { LASSIGN } 
 | "&="     { ANDASSIGN } 
 | "!="     { NOTASSIGN } 
-*)| "//"     { DIVINT } 
+*)
 
-(* Branching Control *)
+    (* Binary Arithmetic Operators *)
+| '+'      { PLUS }
+| '-'      { MINUS }
+| '*'      { TIMES }
+| '/'      { DIVIDE }
+| "%"      { MOD } 
+| "//"     { DIVINT } 
+
+	(* Binary Comparison Operators *)
+| "=="     { EQ }
+| "!="     { NEQ }
+| '<'      { LT }
+| "<="     { LEQ }
+| ">"      { GT }
+| ">="     { GEQ }
+
+	(* Binary Boolean Operators *)
+| "&&"     { AND }
+| "||"     { OR }
+
+	(* Unary Boolean Operators *)
+| "!"      { NOT }
+
+	(* Binary Bitwise Operators *)
+| "|"      { BITOR }
+| "<<"     { LSHIFT } 
+| ">>"     { RSHIFT }
+| "&"      { BITAND }
+| "^"      { BITXOR } 
+
+	(* Branching Control *)
 | "if"       { IF }
 | "else"     { ELSE }
 | "for"      { FOR }
@@ -59,9 +72,11 @@ rule token = parse
 | "continue" { CONTINUE } 
 | "break"    { BREAK } 
 | "return"   { RETURN }
+
+	(* function definition *)
 | "def"      { DEF } 
 
-(* Data and Return Types *)
+	(* Data and Return Types *)
 | "char"   { CHAR }
 | "int"    { INT }
 | "float"  { FLOAT } 
@@ -70,8 +85,8 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
-| "Pixel"  { PIXEL } 
-| "Image"  { IMAGE } 
+(*| "Pixel"  { PIXEL } 
+| "Image"  { IMAGE } *)
 
 (* Literals *)
 | ('-'?) digit+    as lxm    { INT_LITERAL(int_of_string lxm) }

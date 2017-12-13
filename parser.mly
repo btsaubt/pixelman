@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT COLON 
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON 
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL
@@ -71,8 +71,8 @@ typ:
   | CHAR { Char } 
   | STRING { String } 
   | VOID { Void }
-  | PIXEL { Pixel } 
-  | IMAGE { Image } 
+  /*| PIXEL { Pixel } 
+  | IMAGE { Image } */
   | vec_t { $1 }
   | mat_t { $1 }
 
@@ -84,7 +84,7 @@ vdecl:
    typ ID SEMI { ($1, $2) }
 
 vec_t:
-   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) } /* must be given precedence for no S/R errors */
 
 mat_t:
    typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
@@ -139,7 +139,7 @@ expr:
   | expr BITXOR     expr { Binop($1, Bitxor, $3) } 
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | expr ASSIGN expr   { Assign($1, $3) }
+  | ID ASSIGN expr   { Assign($1, $3) }
   /*| ID MULTASSIGN expr { Assign($1, $3) } 
   | ID DIVASSIGN  expr { Assign($1, $3) } 
   | ID PLUSASSIGN expr { Assign($1, $3) } 
@@ -151,8 +151,9 @@ expr:
 */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
-  | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
-  | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) }
+  /* | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
+  | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
+*/
 
 actuals_opt:
     /* nothing */ { [] }
