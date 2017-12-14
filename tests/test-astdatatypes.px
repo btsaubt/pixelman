@@ -1,6 +1,6 @@
 def int main() {
-  Image im; 
-  Pixel pix;
+  :)Image im; 
+  :)Pixel pix;
   
   float a;
   string x; 
@@ -12,6 +12,7 @@ def int main() {
   b = 2; 
   c = 10; 
   if(10%2 == 5) { 
+    print(5);
     return 0;
   }
 
