@@ -1,7 +1,7 @@
 int a;
 bool b;
 
-void foo(int c, bool d)    
+def void foo(int c, bool d)    
 {
   int dd;
   bool e;
@@ -9,10 +9,10 @@ void foo(int c, bool d)
   c - a;
   a * 3;
   c / 2;
-  d + a; /* Error: bool + int */
+  d + a; :) Error: bool + int 
 }
 
-int main()
+def int main()
 {
   return 0;
 }
