@@ -93,7 +93,7 @@ rule token = parse
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | ''' character '''    as lxm    { CHAR_LITERAL(lxm.[1]) }
 | '"' ((character*) as lxm) '"' { STRING_LITERAL(lxm) }
-| ('-'?) (digit+) ['.'] digit+ as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
+| ('-'?) (digit*) ['.'] digit+ as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
 
 (* Comment *) 
 | eof { EOF }
