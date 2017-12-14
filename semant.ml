@@ -276,22 +276,23 @@ let check (globals, functions) =
 
     (* Return a sstmt given a stmt *)
     let rec stmt_to_sstmt = function
-	  Block sl -> let rec check_block = function
+	  Block(sl) -> (* let rec check_block = function
            [Return _ as s] -> check_stmt s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
          | s :: ss -> check_stmt s ; check_block ss
          | [] -> ()
-        in check_block sl
-      | Expr e -> ignore (check_expr e)
-      | Return e -> let t = check_expr e in if t = func.typ then () else
+        in check_block sl *)
+        SBlock(List.map stmt_to_sstmt sl)
+      | Expr(e) -> expr_to_sexpr e
+      | Return(e) -> let se = expr_to_sexpr e in 
+        let t = get_sexpr_type se in
+        if t == func.typ then SReturn(se) else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
-           
-      | If(p, b1, b2) -> check_bool_expr p; check_stmt b1; check_stmt b2
-      | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
-                               ignore (expr e3); check_stmt st
-      | While(p, s) -> check_bool_expr p; check_stmt s
+      | If(p, b1, b2) -> check_bool_expr p; SIf(expr_to_sexpr p, stmt_to_sstmt b1, stmt_to_sstmt b2)
+      | For(e1, e2, e3, st) -> SFor(expr_to_sexpr e1, expr_to_sexpr e2, expr_to_sexpr e3, stmt_to_sstmt st)
+      | While(p, s) -> check_bool_expr p; SWhile(expr_to_sexpr p, stmt_to_sstmt s)
     in
 
     check_stmt (Block func.body)
