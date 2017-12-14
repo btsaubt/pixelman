@@ -1,0 +1,542 @@
+/usr/bin/lli
+
+###### Testing test-add1
+./pixelman.native < tests/test-add1.px > test-add1.ll
+llc test-add1.ll > test-add1.s
+cc -o test-add1.exe -nopie test-add1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-add1.exe
+diff -b test-add1.out tests/test-add1.out > test-add1.diff
+###### SUCCESS
+
+###### Testing test-arith1
+./pixelman.native < tests/test-arith1.px > test-arith1.ll
+llc test-arith1.ll > test-arith1.s
+cc -o test-arith1.exe -nopie test-arith1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-arith1.exe
+diff -b test-arith1.out tests/test-arith1.out > test-arith1.diff
+###### SUCCESS
+
+###### Testing test-arith2
+./pixelman.native < tests/test-arith2.px > test-arith2.ll
+llc test-arith2.ll > test-arith2.s
+cc -o test-arith2.exe -nopie test-arith2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-arith2.exe
+diff -b test-arith2.out tests/test-arith2.out > test-arith2.diff
+###### SUCCESS
+
+###### Testing test-arith3
+./pixelman.native < tests/test-arith3.px > test-arith3.ll
+llc test-arith3.ll > test-arith3.s
+cc -o test-arith3.exe -nopie test-arith3.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-arith3.exe
+diff -b test-arith3.out tests/test-arith3.out > test-arith3.diff
+###### SUCCESS
+
+###### Testing test-astctrlflow
+./pixelman.native < tests/test-astctrlflow.px > test-astctrlflow.ll
+Fatal error: exception Match_failure("codegen.ml", 184, 27)
+###### FAILED
+
+###### Testing test-astdatatypes
+./pixelman.native < tests/test-astdatatypes.px > test-astdatatypes.ll
+llc test-astdatatypes.ll > test-astdatatypes.s
+cc -o test-astdatatypes.exe -nopie test-astdatatypes.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-astdatatypes.exe
+diff -b test-astdatatypes.out tests/test-astdatatypes.out > test-astdatatypes.diff
+###### SUCCESS
+
+###### Testing test-astfloat
+./pixelman.native < tests/test-astfloat.px > test-astfloat.ll
+llc test-astfloat.ll > test-astfloat.s
+cc -o test-astfloat.exe -nopie test-astfloat.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-astfloat.exe
+diff -b test-astfloat.out tests/test-astfloat.out > test-astfloat.diff
+###### SUCCESS
+
+###### Testing test-astop
+./pixelman.native < tests/test-astop.px > test-astop.ll
+Fatal error: exception Match_failure("codegen.ml", 104, 3)
+###### FAILED
+
+###### Testing test-codegenoperators
+./pixelman.native < tests/test-codegenoperators.px > test-codegenoperators.ll
+llc test-codegenoperators.ll > test-codegenoperators.s
+cc -o test-codegenoperators.exe -nopie test-codegenoperators.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-codegenoperators.exe
+diff -b test-codegenoperators.out tests/test-codegenoperators.out > test-codegenoperators.diff
+###### SUCCESS
+
+###### Testing test-fib
+./pixelman.native < tests/test-fib.px > test-fib.ll
+Fatal error: exception Parsing.Parse_error
+###### FAILED
+
+###### Testing test-for1
+./pixelman.native < tests/test-for1.px > test-for1.ll
+llc test-for1.ll > test-for1.s
+cc -o test-for1.exe -nopie test-for1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-for1.exe
+diff -b test-for1.out tests/test-for1.out > test-for1.diff
+###### SUCCESS
+
+###### Testing test-for2
+./pixelman.native < tests/test-for2.px > test-for2.ll
+llc test-for2.ll > test-for2.s
+cc -o test-for2.exe -nopie test-for2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-for2.exe
+diff -b test-for2.out tests/test-for2.out > test-for2.diff
+###### SUCCESS
+
+###### Testing test-func1
+./pixelman.native < tests/test-func1.px > test-func1.ll
+llc test-func1.ll > test-func1.s
+cc -o test-func1.exe -nopie test-func1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func1.exe
+diff -b test-func1.out tests/test-func1.out > test-func1.diff
+###### SUCCESS
+
+###### Testing test-func2
+./pixelman.native < tests/test-func2.px > test-func2.ll
+llc test-func2.ll > test-func2.s
+cc -o test-func2.exe -nopie test-func2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func2.exe
+diff -b test-func2.out tests/test-func2.out > test-func2.diff
+###### SUCCESS
+
+###### Testing test-func3
+./pixelman.native < tests/test-func3.px > test-func3.ll
+llc test-func3.ll > test-func3.s
+cc -o test-func3.exe -nopie test-func3.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func3.exe
+diff -b test-func3.out tests/test-func3.out > test-func3.diff
+###### SUCCESS
+
+###### Testing test-func4
+./pixelman.native < tests/test-func4.px > test-func4.ll
+llc test-func4.ll > test-func4.s
+cc -o test-func4.exe -nopie test-func4.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func4.exe
+diff -b test-func4.out tests/test-func4.out > test-func4.diff
+###### SUCCESS
+
+###### Testing test-func5
+./pixelman.native < tests/test-func5.px > test-func5.ll
+llc test-func5.ll > test-func5.s
+cc -o test-func5.exe -nopie test-func5.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func5.exe
+diff -b test-func5.out tests/test-func5.out > test-func5.diff
+###### SUCCESS
+
+###### Testing test-func6
+./pixelman.native < tests/test-func6.px > test-func6.ll
+llc test-func6.ll > test-func6.s
+cc -o test-func6.exe -nopie test-func6.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func6.exe
+diff -b test-func6.out tests/test-func6.out > test-func6.diff
+###### SUCCESS
+
+###### Testing test-func7
+./pixelman.native < tests/test-func7.px > test-func7.ll
+llc test-func7.ll > test-func7.s
+cc -o test-func7.exe -nopie test-func7.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func7.exe
+diff -b test-func7.out tests/test-func7.out > test-func7.diff
+###### SUCCESS
+
+###### Testing test-func8
+./pixelman.native < tests/test-func8.px > test-func8.ll
+llc test-func8.ll > test-func8.s
+cc -o test-func8.exe -nopie test-func8.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-func8.exe
+diff -b test-func8.out tests/test-func8.out > test-func8.diff
+###### SUCCESS
+
+###### Testing test-gcd
+./pixelman.native < tests/test-gcd.px > test-gcd.ll
+Fatal error: exception Match_failure("codegen.ml", 144, 26)
+###### FAILED
+
+###### Testing test-gcd2
+./pixelman.native < tests/test-gcd2.px > test-gcd2.ll
+Fatal error: exception Match_failure("codegen.ml", 144, 26)
+###### FAILED
+
+###### Testing test-global1
+./pixelman.native < tests/test-global1.px > test-global1.ll
+llc test-global1.ll > test-global1.s
+cc -o test-global1.exe -nopie test-global1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-global1.exe
+diff -b test-global1.out tests/test-global1.out > test-global1.diff
+###### SUCCESS
+
+###### Testing test-global2
+./pixelman.native < tests/test-global2.px > test-global2.ll
+llc test-global2.ll > test-global2.s
+cc -o test-global2.exe -nopie test-global2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-global2.exe
+diff -b test-global2.out tests/test-global2.out > test-global2.diff
+###### SUCCESS
+
+###### Testing test-global3
+./pixelman.native < tests/test-global3.px > test-global3.ll
+llc test-global3.ll > test-global3.s
+cc -o test-global3.exe -nopie test-global3.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-global3.exe
+diff -b test-global3.out tests/test-global3.out > test-global3.diff
+###### SUCCESS
+
+###### Testing test-hello
+./pixelman.native < tests/test-hello.px > test-hello.ll
+llc test-hello.ll > test-hello.s
+cc -o test-hello.exe -nopie test-hello.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-hello.exe
+diff -b test-hello.out tests/test-hello.out > test-hello.diff
+###### SUCCESS
+
+###### Testing test-if1
+./pixelman.native < tests/test-if1.px > test-if1.ll
+llc test-if1.ll > test-if1.s
+cc -o test-if1.exe -nopie test-if1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-if1.exe
+diff -b test-if1.out tests/test-if1.out > test-if1.diff
+###### SUCCESS
+
+###### Testing test-if2
+./pixelman.native < tests/test-if2.px > test-if2.ll
+llc test-if2.ll > test-if2.s
+cc -o test-if2.exe -nopie test-if2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-if2.exe
+diff -b test-if2.out tests/test-if2.out > test-if2.diff
+###### SUCCESS
+
+###### Testing test-if3
+./pixelman.native < tests/test-if3.px > test-if3.ll
+llc test-if3.ll > test-if3.s
+cc -o test-if3.exe -nopie test-if3.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-if3.exe
+diff -b test-if3.out tests/test-if3.out > test-if3.diff
+###### SUCCESS
+
+###### Testing test-if4
+./pixelman.native < tests/test-if4.px > test-if4.ll
+llc test-if4.ll > test-if4.s
+cc -o test-if4.exe -nopie test-if4.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-if4.exe
+diff -b test-if4.out tests/test-if4.out > test-if4.diff
+###### SUCCESS
+
+###### Testing test-if5
+./pixelman.native < tests/test-if5.px > test-if5.ll
+llc test-if5.ll > test-if5.s
+cc -o test-if5.exe -nopie test-if5.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-if5.exe
+diff -b test-if5.out tests/test-if5.out > test-if5.diff
+###### SUCCESS
+
+###### Testing test-local1
+./pixelman.native < tests/test-local1.px > test-local1.ll
+llc test-local1.ll > test-local1.s
+cc -o test-local1.exe -nopie test-local1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-local1.exe
+diff -b test-local1.out tests/test-local1.out > test-local1.diff
+###### SUCCESS
+
+###### Testing test-local2
+./pixelman.native < tests/test-local2.px > test-local2.ll
+llc test-local2.ll > test-local2.s
+cc -o test-local2.exe -nopie test-local2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-local2.exe
+diff -b test-local2.out tests/test-local2.out > test-local2.diff
+###### SUCCESS
+
+###### Testing test-ops1
+./pixelman.native < tests/test-ops1.px > test-ops1.ll
+Fatal error: exception Match_failure("codegen.ml", 144, 26)
+###### FAILED
+
+###### Testing test-ops2
+./pixelman.native < tests/test-ops2.px > test-ops2.ll
+llc test-ops2.ll > test-ops2.s
+cc -o test-ops2.exe -nopie test-ops2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-ops2.exe
+diff -b test-ops2.out tests/test-ops2.out > test-ops2.diff
+###### SUCCESS
+
+###### Testing test-printbig
+./pixelman.native < tests/test-printbig.px > test-printbig.ll
+llc test-printbig.ll > test-printbig.s
+cc -o test-printbig.exe -nopie test-printbig.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-printbig.exe
+diff -b test-printbig.out tests/test-printbig.out > test-printbig.diff
+###### SUCCESS
+
+###### Testing test-printfloat
+./pixelman.native < tests/test-printfloat.px > test-printfloat.ll
+Fatal error: exception Not_found
+###### FAILED
+
+###### Testing test-printstring
+./pixelman.native < tests/test-printstring.px > test-printstring.ll
+llc test-printstring.ll > test-printstring.s
+cc -o test-printstring.exe -nopie test-printstring.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-printstring.exe
+diff -b test-printstring.out tests/test-printstring.out > test-printstring.diff
+###### SUCCESS
+
+###### Testing test-semantdatatypes
+./pixelman.native < tests/test-semantdatatypes.px > test-semantdatatypes.ll
+llc test-semantdatatypes.ll > test-semantdatatypes.s
+cc -o test-semantdatatypes.exe -nopie test-semantdatatypes.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-semantdatatypes.exe
+diff -b test-semantdatatypes.out tests/test-semantdatatypes.out > test-semantdatatypes.diff
+###### SUCCESS
+
+###### Testing test-var1
+./pixelman.native < tests/test-var1.px > test-var1.ll
+llc test-var1.ll > test-var1.s
+cc -o test-var1.exe -nopie test-var1.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-var1.exe
+diff -b test-var1.out tests/test-var1.out > test-var1.diff
+###### SUCCESS
+
+###### Testing test-var2
+./pixelman.native < tests/test-var2.px > test-var2.ll
+llc test-var2.ll > test-var2.s
+cc -o test-var2.exe -nopie test-var2.s printbig.o
+clang: warning: argument unused during compilation: '-nopie'
+./test-var2.exe
+diff -b test-var2.out tests/test-var2.out > test-var2.diff
+###### SUCCESS
+
+###### Testing test-while1
+./pixelman.native < tests/test-while1.px > test-while1.ll
+Fatal error: exception Match_failure("codegen.ml", 144, 26)
+###### FAILED
+
+###### Testing test-while2
+./pixelman.native < tests/test-while2.px > test-while2.ll
+Fatal error: exception Match_failure("codegen.ml", 144, 26)
+###### FAILED
+
+###### Testing fail-assign1
+./pixelman.native < tests/fail-assign1.px 2> fail-assign1.err >> testall.log
+diff -b fail-assign1.err tests/fail-assign1.err > fail-assign1.diff
+FAILED fail-assign1.err differs from tests/fail-assign1.err
+###### FAILED
+
+###### Testing fail-assign2
+./pixelman.native < tests/fail-assign2.px 2> fail-assign2.err >> testall.log
+diff -b fail-assign2.err tests/fail-assign2.err > fail-assign2.diff
+FAILED fail-assign2.err differs from tests/fail-assign2.err
+###### FAILED
+
+###### Testing fail-assign3
+./pixelman.native < tests/fail-assign3.px 2> fail-assign3.err >> testall.log
+diff -b fail-assign3.err tests/fail-assign3.err > fail-assign3.diff
+FAILED fail-assign3.err differs from tests/fail-assign3.err
+###### FAILED
+
+###### Testing fail-dead1
+./pixelman.native < tests/fail-dead1.px 2> fail-dead1.err >> testall.log
+diff -b fail-dead1.err tests/fail-dead1.err > fail-dead1.diff
+FAILED fail-dead1.err differs from tests/fail-dead1.err
+###### FAILED
+
+###### Testing fail-dead2
+./pixelman.native < tests/fail-dead2.px 2> fail-dead2.err >> testall.log
+diff -b fail-dead2.err tests/fail-dead2.err > fail-dead2.diff
+FAILED fail-dead2.err differs from tests/fail-dead2.err
+###### FAILED
+
+###### Testing fail-expr1
+./pixelman.native < tests/fail-expr1.px 2> fail-expr1.err >> testall.log
+diff -b fail-expr1.err tests/fail-expr1.err > fail-expr1.diff
+FAILED fail-expr1.err differs from tests/fail-expr1.err
+###### FAILED
+
+###### Testing fail-expr2
+./pixelman.native < tests/fail-expr2.px 2> fail-expr2.err >> testall.log
+diff -b fail-expr2.err tests/fail-expr2.err > fail-expr2.diff
+FAILED fail-expr2.err differs from tests/fail-expr2.err
+###### FAILED
+
+###### Testing fail-for1
+./pixelman.native < tests/fail-for1.px 2> fail-for1.err >> testall.log
+diff -b fail-for1.err tests/fail-for1.err > fail-for1.diff
+FAILED fail-for1.err differs from tests/fail-for1.err
+###### FAILED
+
+###### Testing fail-for2
+./pixelman.native < tests/fail-for2.px 2> fail-for2.err >> testall.log
+diff -b fail-for2.err tests/fail-for2.err > fail-for2.diff
+FAILED fail-for2.err differs from tests/fail-for2.err
+###### FAILED
+
+###### Testing fail-for3
+./pixelman.native < tests/fail-for3.px 2> fail-for3.err >> testall.log
+diff -b fail-for3.err tests/fail-for3.err > fail-for3.diff
+FAILED fail-for3.err differs from tests/fail-for3.err
+###### FAILED
+
+###### Testing fail-for4
+./pixelman.native < tests/fail-for4.px 2> fail-for4.err >> testall.log
+diff -b fail-for4.err tests/fail-for4.err > fail-for4.diff
+FAILED fail-for4.err differs from tests/fail-for4.err
+###### FAILED
+
+###### Testing fail-for5
+./pixelman.native < tests/fail-for5.px 2> fail-for5.err >> testall.log
+diff -b fail-for5.err tests/fail-for5.err > fail-for5.diff
+FAILED fail-for5.err differs from tests/fail-for5.err
+###### FAILED
+
+###### Testing fail-func1
+./pixelman.native < tests/fail-func1.px 2> fail-func1.err >> testall.log
+diff -b fail-func1.err tests/fail-func1.err > fail-func1.diff
+FAILED fail-func1.err differs from tests/fail-func1.err
+###### FAILED
+
+###### Testing fail-func2
+./pixelman.native < tests/fail-func2.px 2> fail-func2.err >> testall.log
+diff -b fail-func2.err tests/fail-func2.err > fail-func2.diff
+FAILED fail-func2.err differs from tests/fail-func2.err
+###### FAILED
+
+###### Testing fail-func3
+./pixelman.native < tests/fail-func3.px 2> fail-func3.err >> testall.log
+diff -b fail-func3.err tests/fail-func3.err > fail-func3.diff
+FAILED fail-func3.err differs from tests/fail-func3.err
+###### FAILED
+
+###### Testing fail-func4
+./pixelman.native < tests/fail-func4.px 2> fail-func4.err >> testall.log
+diff -b fail-func4.err tests/fail-func4.err > fail-func4.diff
+FAILED fail-func4.err differs from tests/fail-func4.err
+###### FAILED
+
+###### Testing fail-func5
+./pixelman.native < tests/fail-func5.px 2> fail-func5.err >> testall.log
+diff -b fail-func5.err tests/fail-func5.err > fail-func5.diff
+FAILED fail-func5.err differs from tests/fail-func5.err
+###### FAILED
+
+###### Testing fail-func6
+./pixelman.native < tests/fail-func6.px 2> fail-func6.err >> testall.log
+diff -b fail-func6.err tests/fail-func6.err > fail-func6.diff
+FAILED fail-func6.err differs from tests/fail-func6.err
+###### FAILED
+
+###### Testing fail-func7
+./pixelman.native < tests/fail-func7.px 2> fail-func7.err >> testall.log
+diff -b fail-func7.err tests/fail-func7.err > fail-func7.diff
+FAILED fail-func7.err differs from tests/fail-func7.err
+###### FAILED
+
+###### Testing fail-func8
+./pixelman.native < tests/fail-func8.px 2> fail-func8.err >> testall.log
+diff -b fail-func8.err tests/fail-func8.err > fail-func8.diff
+FAILED fail-func8.err differs from tests/fail-func8.err
+###### FAILED
+
+###### Testing fail-func9
+./pixelman.native < tests/fail-func9.px 2> fail-func9.err >> testall.log
+diff -b fail-func9.err tests/fail-func9.err > fail-func9.diff
+FAILED fail-func9.err differs from tests/fail-func9.err
+###### FAILED
+
+###### Testing fail-global1
+./pixelman.native < tests/fail-global1.px 2> fail-global1.err >> testall.log
+diff -b fail-global1.err tests/fail-global1.err > fail-global1.diff
+FAILED fail-global1.err differs from tests/fail-global1.err
+###### FAILED
+
+###### Testing fail-global2
+./pixelman.native < tests/fail-global2.px 2> fail-global2.err >> testall.log
+diff -b fail-global2.err tests/fail-global2.err > fail-global2.diff
+FAILED fail-global2.err differs from tests/fail-global2.err
+###### FAILED
+
+###### Testing fail-if1
+./pixelman.native < tests/fail-if1.px 2> fail-if1.err >> testall.log
+diff -b fail-if1.err tests/fail-if1.err > fail-if1.diff
+FAILED fail-if1.err differs from tests/fail-if1.err
+###### FAILED
+
+###### Testing fail-if2
+./pixelman.native < tests/fail-if2.px 2> fail-if2.err >> testall.log
+diff -b fail-if2.err tests/fail-if2.err > fail-if2.diff
+FAILED fail-if2.err differs from tests/fail-if2.err
+###### FAILED
+
+###### Testing fail-if3
+./pixelman.native < tests/fail-if3.px 2> fail-if3.err >> testall.log
+diff -b fail-if3.err tests/fail-if3.err > fail-if3.diff
+FAILED fail-if3.err differs from tests/fail-if3.err
+###### FAILED
+
+###### Testing fail-nomain
+./pixelman.native < tests/fail-nomain.px 2> fail-nomain.err >> testall.log
+; ModuleID = 'Pixelman'
+source_filename = "Pixelman"
+
+declare i32 @printf(i8*, ...)
+
+declare i32 @printbig(i32)
+###### FAILED
+
+###### Testing fail-return1
+./pixelman.native < tests/fail-return1.px 2> fail-return1.err >> testall.log
+diff -b fail-return1.err tests/fail-return1.err > fail-return1.diff
+FAILED fail-return1.err differs from tests/fail-return1.err
+###### FAILED
+
+###### Testing fail-return2
+./pixelman.native < tests/fail-return2.px 2> fail-return2.err >> testall.log
+diff -b fail-return2.err tests/fail-return2.err > fail-return2.diff
+FAILED fail-return2.err differs from tests/fail-return2.err
+###### FAILED
+
+###### Testing fail-while1
+./pixelman.native < tests/fail-while1.px 2> fail-while1.err >> testall.log
+diff -b fail-while1.err tests/fail-while1.err > fail-while1.diff
+FAILED fail-while1.err differs from tests/fail-while1.err
+###### FAILED
+
+###### Testing fail-while2
+./pixelman.native < tests/fail-while2.px 2> fail-while2.err >> testall.log
+diff -b fail-while2.err tests/fail-while2.err > fail-while2.diff
+FAILED fail-while2.err differs from tests/fail-while2.err
+###### FAILED
