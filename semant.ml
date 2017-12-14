@@ -25,12 +25,6 @@ let check (globals, functions) =
       (Void, n) -> raise (Failure (exceptf n))
     | _ -> ()
   in
-  
-  (* Raise an exception of the given rvalue type cannot be assigned to
-     the given lvalue type *)
-  let check_assign lvaluet rvaluet err =
-     if lvaluet == rvaluet then lvaluet else raise err
-  in
    
   (**** Checking Global Variables ****)
 
@@ -211,6 +205,14 @@ let check (globals, functions) =
       match op with
         Neg -> get_unop_arithmetic_sexpr t
         | Not -> get_unop_boolean_sexpr t
+        | _ -> raise (Failure ("invalid unary operator: " ^ op))
+
+    and get_assign_sexpr var e =
+      let lt = type_of_identifier var
+      and let se = expr_to_sexpr e
+      and let rt = get_sexpr_type se in
+      if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
+         string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))
 
     (* Return an sexpr given an expr *)
     and expr_to_sexpr = function
@@ -224,9 +226,10 @@ let check (globals, functions) =
       | Id s -> SId(s, type_of_identifier s)
 (*      | VecAccess(v, e) -> access_type (type_of_identifier v)
       | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v) *)
-      | Binop(e1, op, e2) as e -> let t1 = check_expr e1 and t2 = check_expr e2 in
-	(match op with
-        Add | Sub | Mult | Div | Bitor | Shiftleft 
+      | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
+         (* let se1 = expr_to_sexpr e1 and se2 = expr_to_sexpr e2 in (match op with
+            Add | Sub | Mult | Div |
+            Bitor | Shiftleft 
         | Shiftright | Bitand | Bitxor | Mod | Divint
           when t1 = Int && t2 = Int -> Int
 	| Equal | Neq when t1 = t2 -> Bool
@@ -235,43 +238,45 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal binary operator " ^
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
               string_of_typ t2 ^ " in " ^ string_of_expr e))
-        )
-      | Unop(op, e) as ex -> let t = check_expr e in
+        ) *)
+      | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
+      (* let t = check_expr e in
 	 (match op with
 	   Neg when t = Int -> Int
 	 | Not when t = Bool -> Bool
          | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
-	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
-      | Noexpr -> Void
-      | Assign(var, e) as ex -> let lt = type_of_identifier var
+	  		   string_of_typ t ^ " in " ^ string_of_expr ex))) *)
+      | Noexpr -> SNoexpr
+      | Assign(var, e) (* as ex *) -> get_assign_sexpr var e
+      (* let lt = type_of_identifier var
                                 and rt = check_expr e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
-				     string_of_expr ex))
-      | Call(fname, actuals) as call -> let fd = function_decl fname in
+				     string_of_expr ex)) *)
+      | Call(fname, actuals) (* as call *) -> let fd = function_decl fname in
          if List.length actuals != List.length fd.formals then
            raise (Failure ("expecting " ^ string_of_int
              (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
          else
-           List.iter2 (fun (ft, _) e -> let et = check_expr e in
-              ignore (check_assign ft et
-                (Failure ("illegal actual argument found " ^ string_of_typ et ^
-                " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
-             fd.formals actuals;
-           fd.typ
+           SCall(fname,List.map2 (fun (ft, _) e -> let se = expr_to_sexpr e in
+            let et = get_sexpr_type se in
+              if et == ft then se else raise (Failure ("illegal actual argument found " ^
+                string_of_typ ft ^ " expected " ^ string_of_typ et ^ " in " ^
+                string_of_expr e))) fd.formals actuals
+            ,fd.typ)
     in
 
-    let check_bool_expr e = if check_expr e != Bool
+    let check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
      then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
      else () in
 
-    let check_int_expr e = if check_expr e != Int
+    let check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
      then raise (Failure ("expected integer expression in " ^ string_of_expr e))
      else () in
 
-    (* Verify a statement or throw an exception *)
-    let rec check_stmt = function
-	Block sl -> let rec check_block = function
+    (* Return a sstmt given a stmt *)
+    let rec stmt_to_sstmt = function
+	  Block sl -> let rec check_block = function
            [Return _ as s] -> check_stmt s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
