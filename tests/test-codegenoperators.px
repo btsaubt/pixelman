@@ -4,13 +4,14 @@ def int main() {
   float c;
   float d;
   float e; 
+  float f;
 
   a = 10;
   b = 2; 
   c = 2.5;
   d = 1.2;
   e = 0.5; 
-  
+
   print(a >> b); 
   print(a << b); 
   
