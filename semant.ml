@@ -109,8 +109,54 @@ let check (globals, functions) =
       | _ -> raise (Failure ("illegal matrix/vector access"))
     in
 
+    let get_binop_boolean_type se1 se2 op = function
+      (Int, Int) -> SBinop(se1, op, se2, Bool)
+      | (Int, Bool) -> SBinop(se1, op, se2, Bool)
+      | (Bool, Int) -> SBinop(se1, op, se2, Bool)
+      | (Bool, Bool) -> SBinop(se1, op, se2, Bool)
+      | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
+    in
+
+    let get_unop_boolean_type se op = function
+      Int -> SUnop(op, se, Bool)
+      | Bool -> SUnop(op, se, Bool)
+      | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
+    in
+
+    let get_binop_arithmetic_type se1 se2 op = function
+      (Int, Int) -> SBinop(se1, op, se2, Int)
+      | (Int, Float) -> SBinop(se1, op, se2, Float)
+      | (Float, Int) -> SBinop(se1, op, se2, Float)
+      | (Float, Float) -> SBinop(se1, op, se2, Float)
+      | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
+    in
+
+    let get_unop_arithmetic_type se op = function
+      Int  -> SUnop(op, se, Int)
+      | Float -> SUnop(op, se, Float)
+      | _ -> raise (Failure ("can only perform unary arithmetic operators with Int/Float variables or matrices"))
+    in
+
+    let get_binop_bitshift_type se1 se2 op = function
+      (Int, Int) -> SBinop(se1, op, se2, Int)
+      | _ -> raise (Failure ("can only perform bitshift on integer types"))
+    in
+
+    let get_binop_comparison_type se1 se2 op = function
+      (Int, Int) -> SBinop(se1, op, se2, Bool)
+      | (Float, Float) -> SBinop(se1, op, se2, Bool)
+      | _ -> raise (Failure ("can only compare ints/floats with themselves for inequalities"))
+    in
+
+    let get_equality_type se1 se2 op = function
+      (Int, Int) -> SBinop(se1, op, se2, Bool)
+      | (Float, Float) -> SBinop(se1, op, se2, Bool)
+      | (Char, Char) -> SBinop(se1, op, se2, Bool)
+      | _ -> raise (Failure ("can only compare ints/floats with themselves for equality"))
+    in
+
     (* Return the type of an expression or throw an exception *)
-    let rec expr = function
+    let rec check_expr = function
         Int_Literal _ -> Int
       | String_Literal _ -> String
       | Float_Literal _ -> Float 
@@ -121,7 +167,7 @@ let check (globals, functions) =
       | Id s -> type_of_identifier s
       | VecAccess(v, e) -> access_type (type_of_identifier v)
       | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v)
-      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
+      | Binop(e1, op, e2) as e -> let t1 = check_expr e1 and t2 = check_expr e2 in
 	(match op with
         Add | Sub | Mult | Div | Bitor | Shiftleft 
         | Shiftright | Bitand | Bitxor | Mod | Divint
@@ -133,7 +179,7 @@ let check (globals, functions) =
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
               string_of_typ t2 ^ " in " ^ string_of_expr e))
         )
-      | Unop(op, e) as ex -> let t = expr e in
+      | Unop(op, e) as ex -> let t = check_expr e in
 	 (match op with
 	   Neg when t = Int -> Int
 	 | Not when t = Bool -> Bool
@@ -141,7 +187,7 @@ let check (globals, functions) =
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
       | Noexpr -> Void
       | Assign(var, e) as ex -> let lt = type_of_identifier var
-                                and rt = expr e in
+                                and rt = check_expr e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
 				     string_of_expr ex))
@@ -150,7 +196,7 @@ let check (globals, functions) =
            raise (Failure ("expecting " ^ string_of_int
              (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
          else
-           List.iter2 (fun (ft, _) e -> let et = expr e in
+           List.iter2 (fun (ft, _) e -> let et = check_expr e in
               ignore (check_assign ft et
                 (Failure ("illegal actual argument found " ^ string_of_typ et ^
                 " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
@@ -158,31 +204,35 @@ let check (globals, functions) =
            fd.typ
     in
 
-    let check_bool_expr e = if expr e != Bool
-     then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
+    let check_bool_expr e = if check_expr e != Bool
+     then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
+     else () in
+
+    let check_int_expr e = if check_expr e != Int
+     then raise (Failure ("expected integer expression in " ^ string_of_expr e))
      else () in
 
     (* Verify a statement or throw an exception *)
-    let rec stmt = function
+    let rec check_stmt = function
 	Block sl -> let rec check_block = function
-           [Return _ as s] -> stmt s
+           [Return _ as s] -> check_stmt s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
-         | s :: ss -> stmt s ; check_block ss
+         | s :: ss -> check_stmt s ; check_block ss
          | [] -> ()
         in check_block sl
-      | Expr e -> ignore (expr e)
-      | Return e -> let t = expr e in if t = func.typ then () else
+      | Expr e -> ignore (check_expr e)
+      | Return e -> let t = check_expr e in if t = func.typ then () else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
            
-      | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2
+      | If(p, b1, b2) -> check_bool_expr p; check_stmt b1; check_stmt b2
       | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
-                               ignore (expr e3); stmt st
-      | While(p, s) -> check_bool_expr p; stmt s
+                               ignore (expr e3); check_stmt st
+      | While(p, s) -> check_bool_expr p; check_stmt s
     in
 
-    stmt (Block func.body)
+    check_stmt (Block func.body)
    
   in
   List.iter check_function functions
