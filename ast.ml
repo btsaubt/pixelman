@@ -11,6 +11,8 @@ type expr =
   | Float_Literal of float
   | Char_Literal of char
   | String_Literal of string 
+  | Vector_Literal of expr list 
+  | Matrix_Literal of expr list list 
   | Pixel of expr * expr * expr * expr * expr
   | Image of expr * expr 
   | BoolLit of bool
@@ -79,10 +81,11 @@ let rec string_of_expr = function
   | Float_Literal(f) -> string_of_float f
   | Char_Literal(c) -> Char.escaped c
   | String_Literal(s) -> s
-  | Pixel(r, g, b, x, y) -> "Pixel(" ^ string_of_expr r ^ ", " ^ string_of_expr g ^ ", " ^ 
+  (*| Pixel(r, g, b, x, y) -> "Pixel(" ^ string_of_expr r ^ ", " ^ string_of_expr g ^ ", " ^ 
                             string_of_expr b ^ ", " ^ string_of_expr x ^ ", " ^ 
                             string_of_expr y 
   | Image(h, w) -> string_of_expr h ^ ", " ^ string_of_expr w
+  *)  
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | Id(s) -> s
