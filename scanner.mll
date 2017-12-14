@@ -1,45 +1,28 @@
-(* Ocamllex scanner for MicroC *)
+(* Ocamllex scanner for pixelman *)
 
 { open Parser }
 
 let character = [' '-'!' '#'-'[' ']'-'~'] | ('\\' ['\\' ''' '"' 'n' 'r' 't'])
 let digit = ['0'-'9']
+let whitespace = [' ' '\t' '\n' '\r'] 
 
 rule token = parse
-  [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| ":)"     { comment lexbuf }           (* Comments *)
-
-    (* Operators and Separators *)
+  whitespace { token lexbuf }             (* Whitespace *)
+  | ":)"     { comment lexbuf }           (* Comments *)
+    (* Separators *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
 | ';'      { SEMI }
 | ','      { COMMA }
-| ':'      { COLON } 
-| '+'      { PLUS }
-| '-'      { MINUS }
-| '*'      { TIMES }
-| '/'      { DIVIDE }
-| '='      { ASSIGN }
-| "=="     { EQ }
-| "!="     { NEQ }
-| '<'      { LT }
-| "<="     { LEQ }
-| ">"      { GT }
-| ">="     { GEQ }
-| "&&"     { AND }
-| "||"     { OR }
-| "!"      { NOT }
-| "."      { DOT }
 | "["      { LBRACKET } 
 | "]"      { RBRACKET } 
-| "|"      { BITOR }
-| "%"      { MOD } 
-| "<<"     { LSHIFT } 
-| ">>"     { RSHIFT }
-| "&"      { BITAND }
-| "^"      { BITXOR } 
+(*| ':'      { COLON }
+| "."      { DOT } *)
+
+	(* Assignment Operators *)
+| '='      { ASSIGN }
 (*| "*="     { MULTASSIGN } 
 | "/="     { DIVASSIGN }
 | "%="     { MODASSIGN } 
@@ -49,9 +32,39 @@ rule token = parse
 | "<<="    { LASSIGN } 
 | "&="     { ANDASSIGN } 
 | "!="     { NOTASSIGN } 
-*)| "//"     { DIVINT } 
+*)
 
-(* Branching Control *)
+    (* Binary Arithmetic Operators *)
+| '+'      { PLUS }
+| '-'      { MINUS }
+| '*'      { TIMES }
+| '/'      { DIVIDE }
+| "%"      { MOD } 
+| "//"     { DIVINT } 
+
+	(* Binary Comparison Operators *)
+| "=="     { EQ }
+| "!="     { NEQ }
+| '<'      { LT }
+| "<="     { LEQ }
+| ">"      { GT }
+| ">="     { GEQ }
+
+	(* Binary Boolean Operators *)
+| "&&"     { AND }
+| "||"     { OR }
+
+	(* Unary Boolean Operators *)
+| "!"      { NOT }
+
+	(* Binary Bitwise Operators *)
+| "|"      { BITOR }
+| "<<"     { LSHIFT } 
+| ">>"     { RSHIFT }
+| "&"      { BITAND }
+| "^"      { BITXOR } 
+
+	(* Branching Control *)
 | "if"       { IF }
 | "else"     { ELSE }
 | "for"      { FOR }
@@ -59,9 +72,11 @@ rule token = parse
 | "continue" { CONTINUE } 
 | "break"    { BREAK } 
 | "return"   { RETURN }
+
+	(* function definition *)
 | "def"      { DEF } 
 
-(* Data and Return Types *)
+	(* Data and Return Types *)
 | "char"   { CHAR }
 | "int"    { INT }
 | "float"  { FLOAT } 
@@ -81,9 +96,10 @@ rule token = parse
 | '"' (character*) '"' as lxm    { STRING_LITERAL(lxm) }
 | ('-'?) (digit+) ['.'] digit+ as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
 
+(* Comment *) 
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and comment = parse
-  ":)" { token lexbuf }
-| _    { comment lexbuf }
+  | '\n' { token lexbuf }
+  | _    { comment lexbuf }

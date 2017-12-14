@@ -1,14 +1,15 @@
-/* Ocamlyacc parser for MicroC */
+/* Ocamlyacc parser for Pixelman */
 
 %{
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA DOT COLON 
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON 
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL
 IMAGE
+%token NOVECLBRACKET
 %token BREAK CONTINUE
 %token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
 %token <int> INT_LITERAL
@@ -21,6 +22,8 @@ IMAGE
 
 %nonassoc NOELSE
 %nonassoc ELSE
+%nonassoc NOVECLBRACKET
+%nonassoc LBRACKET
 %right ASSIGN
 %left OR
 %left AND
@@ -74,14 +77,18 @@ typ:
   | IMAGE { Image } 
   | ARRAY { Array }
 
-
-
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
    typ ID SEMI { ($1, $2) }
+
+vec_t:
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) } /* must be given precedence for no S/R errors */
+
+mat_t:
+   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
 
 stmt_list:
     /* nothing */  { [] }
@@ -117,7 +124,7 @@ expr:
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
   | expr DIVINT expr { Binop($1, Divint,   $3) }
-  | expr MOD expr { Binop($1, Mod,   $3) }
+  | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
@@ -145,6 +152,9 @@ expr:
 */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+  /* | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
+  | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
+*/
 
 actuals_opt:
     /* nothing */ { [] }

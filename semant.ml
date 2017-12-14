@@ -31,6 +31,8 @@ let check (globals, functions) =
   let check_assign lvaluet rvaluet err =
      if lvaluet == rvaluet then lvaluet else raise err
   in
+
+  let 
    
   (**** Checking Global Variables ****)
 
@@ -64,6 +66,8 @@ let check (globals, functions) =
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.singleton "print_string"
      { typ = Void; fname = "print_string"; formals = [(String, "x")];
+       locals = []; body = [] }))) (StringMap.add "print_float"
+     { typ = Void; fname = "print_float"; formals = [(Float, "x")];
        locals = []; body = [] })))
    in
      
@@ -101,18 +105,32 @@ let check (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
+    let access_type = function
+      Vector(t, _) -> t
+      | Matrix(t, _, _) -> t
+      | _ -> raise (Failure ("illegal matrix/vector access"))
+    in
+
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
         Int_Literal _ -> Int
       | String_Literal _ -> String
+      | Float_Literal _ -> Float 
       | BoolLit _ -> Bool
+      | Char_Literal _ -> Char
+      | Pixel(r, g, b, x, y) -> Pixel 
+      | Image(h, w) -> Image 
       | Id s -> type_of_identifier s
+      | VecAccess(v, e) -> access_type (type_of_identifier v)
+      | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v)
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
-          Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+        Add | Sub | Mult | Div | Bitor | Shiftleft 
+        | Shiftright | Bitand | Bitxor | Mod | Divint
+          when t1 = Int && t2 = Int -> Int
 	| Equal | Neq when t1 = t2 -> Bool
-	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
-	| And | Or when t1 = Bool && t2 = Bool -> Bool
+	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int || t1 = Float && t2 = Float -> Bool
+        | And | Or when t1 = Bool && t2 = Bool -> Bool
         | _ -> raise (Failure ("illegal binary operator " ^
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
               string_of_typ t2 ^ " in " ^ string_of_expr e))
