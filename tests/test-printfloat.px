@@ -1,0 +1,3 @@
+def int main(){
+	print_float(42.7);
+}

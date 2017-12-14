@@ -1,0 +1,9 @@
+1c1,6
+< Fatal error: exception Parsing.Parse_error
+---
+> 1,3c1
+> < Stored value type does not match pointer operand type!
+> <   store i1 false, i32* %i
+> <  i32LLVM ERROR: Broken module found, compilation aborted!
+> ---
+> > Fatal error: exception Failure("illegal assignment int = bool in i = false")
