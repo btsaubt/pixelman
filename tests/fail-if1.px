@@ -1,6 +1,6 @@
-int main()
+def int main()
 {
   if (true) {}
   if (false) {} else {}
-  if (42) {} /* Error: non-bool predicate */
+  if (42) {} :) Error: non-bool predicate
 }
