@@ -1,0 +1,9 @@
+def int main() {
+  float a;
+  float d;
+  float e;
+
+  a = 1.0;
+  d = 2.4;
+  e = .5; 
+} 
