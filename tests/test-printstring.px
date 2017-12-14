@@ -1,4 +1,4 @@
-int main()
+def int main()
 {
   print_string("Hello World!");
   return 0;
