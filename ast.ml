@@ -4,11 +4,9 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
           And | Or | Divint | Shiftleft | Shiftright | Bitand | Bitor | Bitxor |
           Mod
 
+
 type uop = Neg | Not
 
-type typ = Int | Bool | Float | Char | String | Void | Image | Pixel | Array 
-
-type bind = typ * string
 
 type expr =
     Int_Literal of int
@@ -27,7 +25,7 @@ type expr =
   | MatAccess of string * expr * expr *)
   | Noexpr
 
-type typ = Int | Bool | Float | Char | String | Void | (*Image | Pixel |*) Vector of typ * expr | Matrix of typ * expr * expr
+type typ = Int | Bool | Float | Char | String | Void | Vector of typ * expr | Matrix of typ * expr * expr
 
 type bind = typ * string
 
@@ -124,16 +122,6 @@ let rec string_of_typ = function
   | Float -> "float"
   | String -> "string"
   | Void -> "void"
-<<<<<<< HEAD
-  | Pixel -> "Pixel" 
-  | Image -> "Image" 
-  | Array -> "Array[]"
-=======
-  (*| Pixel -> "Pixel" 
-  | Image -> "Image" *)
-  | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
-  | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
->>>>>>> 25fa8e852d0cae69a07eb70950c076760991b884
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

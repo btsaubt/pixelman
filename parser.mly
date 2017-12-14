@@ -73,9 +73,6 @@ typ:
   | CHAR { Char } 
   | STRING { String } 
   | VOID { Void }
-  | PIXEL { Pixel } 
-  | IMAGE { Image } 
-  | ARRAY { Array }
 
 vdecl_list:
     /* nothing */    { [] }
