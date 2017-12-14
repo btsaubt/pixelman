@@ -102,21 +102,52 @@ let translate (globals, functions) =
 	  let e1' = expr builder e1
 	  and e2' = expr builder e2 in
 	  (match op with
-	    A.Add     -> L.build_add
-	  | A.Sub     -> L.build_sub
+	  (*  A.Add     -> L.build_add *)
+            A.Add -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
+                      (match e1_type_string with 
+                         "float" -> L.build_fadd 
+                          | "i32" -> L.build_add)) 
+          | A.Sub      -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
+                          (match e1_type_string with 
+                            "float" -> L.build_fsub
+                            | "i32"  -> L.build_sub))
           | A.Mod     -> L.build_urem
-          | A.Mult    -> L.build_mul
-          | A.Div     -> L.build_sdiv
+          | A.Mult    -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
+                          (match e1_type_string with 
+                          "float" -> L.build_fmul
+                          | "i32"  -> L.build_mul))
+          | A.Div     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
+                          (match e1_type_string with 
+                             "float" -> L.build_fdiv
+                             | "i32"  -> L.build_sdiv))
 	  | A.And     -> L.build_and
 	  | A.Or      -> L.build_or
           | A.Shiftright -> L.build_lshr
           | A.Shiftleft -> L.build_shl
-          | A.Equal   -> L.build_icmp L.Icmp.Eq
-	  | A.Neq     -> L.build_icmp L.Icmp.Ne
-	  | A.Less    -> L.build_icmp L.Icmp.Slt
-	  | A.Leq     -> L.build_icmp L.Icmp.Sle
-	  | A.Greater -> L.build_icmp L.Icmp.Sgt
-	  | A.Geq     -> L.build_icmp L.Icmp.Sge
+          | A.Equal   -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
+                          (match e1_type_string with 
+                          "float" -> L.build_fcmp L.Fcmp.Oeq
+                          | "i32" -> L.build_icmp L.Icmp.Eq)) 
+          | A.Neq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
+                          (match e1_type_string with
+                          "float" -> L.build_fcmp L.Fcmp.One
+                          | "i32" -> L.build_icmp L.Icmp.Ne))
+          | A.Less    -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
+                          (match e1_type_string with 
+                          "float" -> L.build_fcmp L.Fcmp.Olt
+                          | "i32" -> L.build_icmp L.Icmp.Slt))
+          | A.Leq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
+                          (match e1_type_string with 
+                          "float" -> L.build_fcmp L.Fcmp.Ole
+                           | "i32"   -> L.build_icmp L.Icmp.Sle)) 
+          | A.Greater -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
+                          (match e1_type_string with 
+                          "float" -> L.build_fcmp L.Fcmp.Ogt
+                           | "132"   -> L.build_icmp L.Icmp.Sgt))
+          | A.Geq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
+                          (match e1_type_string with 
+                          "float" -> L.build_fcmp L.Fcmp.Oge
+                           | "i32"   -> L.build_icmp L.Icmp.Sge)) 
 	  ) e1' e2' "tmp" builder
       | A.Unop(op, e) ->
 	  let e' = expr builder e in
