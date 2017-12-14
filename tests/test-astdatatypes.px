@@ -11,7 +11,7 @@ def int main() {
   int c; 
   b = 2; 
   c = 10; 
-  if(10%2 == 5) { 
+  if(10%2 == 0) { 
     print(5);
     return 0;
   }
