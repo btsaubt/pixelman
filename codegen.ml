@@ -143,7 +143,7 @@ let translate (globals, functions) =
           | A.Greater -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
                           (match e1_type_string with 
                           "float" -> L.build_fcmp L.Fcmp.Ogt
-                           | "132"   -> L.build_icmp L.Icmp.Sgt))
+                           | "i32"   -> L.build_icmp L.Icmp.Sgt))
           | A.Geq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
                           "float" -> L.build_fcmp L.Fcmp.Oge
