@@ -13,7 +13,7 @@ type expr =
   | String_Literal of string 
   | Pixel of expr * expr * expr * expr * expr
   | Image of expr * expr 
-  | BoolLit of bool
+  | Bool_Literal of bool
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -83,8 +83,8 @@ let rec string_of_expr = function
                             string_of_expr b ^ ", " ^ string_of_expr x ^ ", " ^ 
                             string_of_expr y 
   | Image(h, w) -> string_of_expr h ^ ", " ^ string_of_expr w
-  | BoolLit(true) -> "true"
-  | BoolLit(false) -> "false"
+  | Bool_Literal(true) -> "true"
+  | Bool_Literal(false) -> "false"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2

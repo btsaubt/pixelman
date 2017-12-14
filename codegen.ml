@@ -95,7 +95,7 @@ let translate (globals, functions) =
       | A.Float_Literal f -> L.const_float f_t f
       | A.Char_Literal c -> L.const_int i8_t (Char.code c)
       | A.String_Literal s -> L.build_global_stringptr s "s" builder
-      | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+      | A.Bool_Literal b -> L.const_int i1_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->

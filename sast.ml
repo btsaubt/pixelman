@@ -8,12 +8,12 @@ type sexpr =
   | SFloat_Literal of float
   | SString_Literal of string
   | SBool_Literal of bool
-  | SId of string
+  | SId of string * typ
   | SBinop of sexpr * op * sexpr * typ
   | SUnop of uop * sexpr * typ
   | SAssign of string * sexpr * typ
-(*  | SVecAccess of string * expr
-  | SMatAccess of string * expr * expr *)
+(*  | SVecAccess of string * expr * typ
+  | SMatAccess of string * expr * expr * typ *)
   | SCall of string * sexpr list * typ
   | SNoexpr
 

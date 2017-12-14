@@ -31,8 +31,6 @@ let check (globals, functions) =
   let check_assign lvaluet rvaluet err =
      if lvaluet == rvaluet then lvaluet else raise err
   in
-
-  let 
    
   (**** Checking Global Variables ****)
 
@@ -93,7 +91,7 @@ let check (globals, functions) =
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
 
-    (* Type of each variable (global, formal, or local *)
+    (* Type of each variable (global, formal, or local) *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
 	StringMap.empty (globals @ func.formals @ func.locals )
     in
@@ -109,64 +107,123 @@ let check (globals, functions) =
       | _ -> raise (Failure ("illegal matrix/vector access"))
     in
 
-    let get_binop_boolean_type se1 se2 op = function
-      (Int, Int) -> SBinop(se1, op, se2, Bool)
-      | (Int, Bool) -> SBinop(se1, op, se2, Bool)
-      | (Bool, Int) -> SBinop(se1, op, se2, Bool)
-      | (Bool, Bool) -> SBinop(se1, op, se2, Bool)
-      | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
+    let get_binop_boolean_sexpr se1 se2 op = 
+      let t1 = get_sexpr_type se1 in
+      let t2 = get_sexpr_type se2 in
+      let sexpr = function
+        (Int, Int) -> SBinop(se1, op, se2, Bool)
+        | (Int, Bool) -> SBinop(se1, op, se2, Bool)
+        | (Bool, Int) -> SBinop(se1, op, se2, Bool)
+        | (Bool, Bool) -> SBinop(se1, op, se2, Bool)
+        | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
+      in sexpr (t1, t2)
     in
 
-    let get_unop_boolean_type se op = function
-      Int -> SUnop(op, se, Bool)
-      | Bool -> SUnop(op, se, Bool)
-      | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
+    let get_unop_boolean_sexpr se op =
+      let t = get_sexpr_type se in
+      let sexpr = function
+        Int -> SUnop(op, se, Bool)
+        | Bool -> SUnop(op, se, Bool)
+        | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
+      in sexpr t
     in
 
-    let get_binop_arithmetic_type se1 se2 op = function
-      (Int, Int) -> SBinop(se1, op, se2, Int)
-      | (Int, Float) -> SBinop(se1, op, se2, Float)
-      | (Float, Int) -> SBinop(se1, op, se2, Float)
-      | (Float, Float) -> SBinop(se1, op, se2, Float)
-      | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
+    let get_binop_arithmetic_sexpr se1 se2 op = 
+      let t1 = get_sexpr_type se1 in
+      let t2 = get_sexpr_type se2 in
+      let sexpr = function
+        (Int, Int) -> SBinop(se1, op, se2, Int)
+        | (Int, Float) -> SBinop(se1, op, se2, Float)
+        | (Float, Int) -> SBinop(se1, op, se2, Float)
+        | (Float, Float) -> SBinop(se1, op, se2, Float)
+        | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
+      in sexpr (t1, t2)
     in
 
-    let get_unop_arithmetic_type se op = function
-      Int  -> SUnop(op, se, Int)
-      | Float -> SUnop(op, se, Float)
-      | _ -> raise (Failure ("can only perform unary arithmetic operators with Int/Float variables or matrices"))
+    let get_unop_arithmetic_sexpr se op = 
+      let t = get_sexpr_type se in
+      let sexpr = function
+        Int  -> SUnop(op, se, Int)
+        | Float -> SUnop(op, se, Float)
+        | _ -> raise (Failure ("can only perform unary arithmetic operators with Int/Float variables or matrices"))
+      in sexpr t
     in
 
-    let get_binop_bitshift_type se1 se2 op = function
-      (Int, Int) -> SBinop(se1, op, se2, Int)
-      | _ -> raise (Failure ("can only perform bitshift on integer types"))
+    let get_binop_bitwise_sexpr se1 se2 op = 
+      let t1 = get_sexpr_type se1 in
+      let t2 = get_sexpr_type se2 in
+      let sexpr = function
+        (Int, Int) -> SBinop(se1, op, se2, Int)
+        | _ -> raise (Failure ("can only perform bitwise operations on integer types"))
+      in sexpr (t1 t2)
     in
 
-    let get_binop_comparison_type se1 se2 op = function
-      (Int, Int) -> SBinop(se1, op, se2, Bool)
-      | (Float, Float) -> SBinop(se1, op, se2, Bool)
-      | _ -> raise (Failure ("can only compare ints/floats with themselves for inequalities"))
+    let get_binop_comparison_sexpr se1 se2 op = 
+      let t1 = get_sexpr_type se1 in
+      let t2 = get_sexpr_type se2 in
+      let sexpr = function
+        (Int, Int) -> SBinop(se1, op, se2, Bool)
+        | (Float, Float) -> SBinop(se1, op, se2, Bool)
+        | _ -> raise (Failure ("can only compare ints/floats with themselves for inequalities"))
+      in sexpr (t1, t2)
     in
 
-    let get_equality_type se1 se2 op = function
-      (Int, Int) -> SBinop(se1, op, se2, Bool)
-      | (Float, Float) -> SBinop(se1, op, se2, Bool)
-      | (Char, Char) -> SBinop(se1, op, se2, Bool)
-      | _ -> raise (Failure ("can only compare ints/floats with themselves for equality"))
+    let get_equality_type se1 se2 op = 
+      let t1 = get_sexpr_type se1 in
+      let t2 = get_sexpr_type se2 in
+      let sexpr = function
+        (Int, Int) -> SBinop(se1, op, se2, Bool)
+        | (Float, Float) -> SBinop(se1, op, se2, Bool)
+        | (Char, Char) -> SBinop(se1, op, se2, Bool)
+        | _ -> raise (Failure ("can only compare ints/floats/chars with themselves for equality"))
+      in sexpr (t1, t2)
     in
 
-    (* Return the type of an expression or throw an exception *)
-    let rec check_expr = function
-        Int_Literal _ -> Int
-      | String_Literal _ -> String
-      | Float_Literal _ -> Float 
-      | BoolLit _ -> Bool
-      | Char_Literal _ -> Char
-      | Pixel(r, g, b, x, y) -> Pixel 
-      | Image(h, w) -> Image 
-      | Id s -> type_of_identifier s
-      | VecAccess(v, e) -> access_type (type_of_identifier v)
-      | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v)
+    let get_sexpr_type se = match se with
+        SInt_Literal(_) -> Int
+        | SFloat_Literal(_) -> Float
+        | SString_Literal(_) -> String
+        | SBool_Literal(_) -> Bool
+        | SId(_,t) -> t
+        | SBinop(_,_,_,t) -> t
+        | SUnop(_,_,t) -> t
+        | SAssign(_,_,t) -> t
+        (* | SVecAccess(_,_,t) -> t
+        | SMatAccess(_,_,_,t) -> t *)
+        | SCall(_,_,t) -> t
+        | SNoexpr -> Void
+    in
+
+    let get_binop_sexpr e1 e2 op =
+      let se1 = expr_to_sexpr e1 in
+      let se2 = expr_to_sexpr e2 in
+      match op with
+        Equal | Neq -> get_equality_type t1 t2 op
+        | And | Or  -> get_binop_boolean_sexpr t1 t2 op
+        | Less | Leq | Greater | Geq -> get_binop_comparison_sexpr t1 t2 op
+        | Shiftleft | Shiftright | Bitand | Bitor | Bitxor -> get_binop_bitwise_sexpr t1 t2 op
+        | Add | Sub | Mult | Div | Divint | Mod -> get_binop_arithmetic_sexpr t1 t2 op
+        | _ -> raise (Failure ("invalid binary operator: " ^ op))
+
+    and get_unop_sexpr op e =
+      let se = expr_to_sexpr e in
+      let t = get_sexpr_type se in
+      match op with
+        Neg -> get_unop_arithmetic_sexpr t
+        | Not -> get_unop_boolean_sexpr t
+
+    (* Return an sexpr given an expr *)
+    and expr_to_sexpr = function
+        Int_Literal(i) -> SInt_Literal(i)
+      | String_Literal(s) -> SString_Literal(s)
+      | Float_Literal(f) -> SFloat_Literal(f)
+      | Bool_Literal(b) -> SBool_Literal(b)
+      | Char_Literal(c) -> SChar_Literal(c)
+(*      | Pixel(r, g, b, x, y) -> Pixel 
+      | Image(h, w) -> Image *)
+      | Id s -> SId(s, type_of_identifier s)
+(*      | VecAccess(v, e) -> access_type (type_of_identifier v)
+      | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v) *)
       | Binop(e1, op, e2) as e -> let t1 = check_expr e1 and t2 = check_expr e2 in
 	(match op with
         Add | Sub | Mult | Div | Bitor | Shiftleft 
@@ -234,5 +291,8 @@ let check (globals, functions) =
 
     check_stmt (Block func.body)
    
-  in
-  List.iter check_function functions
+  in 
+  ignore(List.iter check_function functions);
+  let sfdecls = List.map fdecl_to_sfdecl functions in
+  (globals, sfdecls)
+

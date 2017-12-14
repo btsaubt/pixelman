@@ -116,8 +116,8 @@ expr:
   | STRING_LITERAL   { String_Literal($1) }
   | FLOAT_LITERAL    { Float_Literal($1) } 
   | CHAR_LITERAL     { Char_Literal($1) } 
-  | TRUE             { BoolLit(true) }
-  | FALSE            { BoolLit(false) }
+  | TRUE             { Bool_Literal(true) }
+  | FALSE            { Bool_Literal(false) }
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
