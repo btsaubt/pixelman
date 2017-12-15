@@ -36,16 +36,13 @@ let check (globals, functions) =
   (**** Checking Functions ****)
 
   let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
-                                 "display"; "resize"; "transform"] in
+                                 "display"; "resize"; "transform"; "print_float"] in
   let rec check_protected = function
     [] -> ()
     | h :: t -> if List.mem h (List.map (fun fd -> fd.fname) functions)
         then raise (Failure ("function" ^ h ^ "may not be defined"))
         else ignore (check_protected t)
   in check_protected protected_functions;
-
-  (*if List.mem "print" (List.map (fun fd -> fd.fname) functions)
-  then raise (Failure ("function print may not be defined")) else ();*)
 
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
@@ -57,9 +54,11 @@ let check (globals, functions) =
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
        locals = []; body = [] } (StringMap.add "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] } (StringMap.singleton "print_string"
+       locals = []; body = [] } (StringMap.add "print_string"
      { typ = Void; fname = "print_string"; formals = [(String, "x")];
-       locals = []; body = [] })))
+       locals = []; body = [] } (StringMap.singleton "print_float" 
+     { typ = Void; fname = "print_float"; formals = [(Float, "x")];
+       locals = []; body = [] } ))))
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -79,9 +78,6 @@ let check (globals, functions) =
 
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
-
-    List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
-      " in " ^ func.fname)) func.locals;
 
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
@@ -112,8 +108,8 @@ let check (globals, functions) =
         | SBinop(_,_,_,t) -> t
         | SUnop(_,_,t) -> t
         | SAssign(_,_,t) -> t
-        (* | SVecAccess(_,_,t) -> t
-        | SMatAccess(_,_,_,t) -> t *)
+        | SVecAccess(_,_,t) -> t
+        | SMatAccess(_,_,_,t) -> t
         | SCall(_,_,t) -> t
         | SNoexpr -> Void
     in
@@ -187,35 +183,12 @@ let check (globals, functions) =
 (*      | Pixel(r, g, b, x, y) -> Pixel 
       | Image(h, w) -> Image *)
       | Id s -> SId(s, type_of_identifier s)
-(*      | VecAccess(v, e) -> access_type (type_of_identifier v)
-      | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v) *)
+      | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, e, access_type (type_of_identifier v))
+      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, e1, e2, access_type (type_of_identifier v))
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
-         (* let se1 = expr_to_sexpr e1 and se2 = expr_to_sexpr e2 in (match op with
-            Add | Sub | Mult | Div |
-            Bitor | Shiftleft 
-        | Shiftright | Bitand | Bitxor | Mod | Divint
-          when t1 = Int && t2 = Int -> Int
-  | Equal | Neq when t1 = t2 -> Bool
-  | Less | Leq | Greater | Geq when t1 = Int && t2 = Int || t1 = Float && t2 = Float -> Bool
-        | And | Or when t1 = Bool && t2 = Bool -> Bool
-        | _ -> raise (Failure ("illegal binary operator " ^
-              string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-              string_of_typ t2 ^ " in " ^ string_of_expr e))
-        ) *)
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
-      (* let t = check_expr e in
-   (match op with
-     Neg when t = Int -> Int
-   | Not when t = Bool -> Bool
-         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
-           string_of_typ t ^ " in " ^ string_of_expr ex))) *)
       | Noexpr -> SNoexpr
       | Assign(var, e) (* as ex *) -> get_assign_sexpr var e
-      (* let lt = type_of_identifier var
-                                and rt = check_expr e in
-        check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-             " = " ^ string_of_typ rt ^ " in " ^ 
-             string_of_expr ex)) *)
       | Call(fname, actuals) as call -> let fd = function_decl fname in
          if List.length actuals != List.length fd.formals then
            raise (Failure ("expecting " ^ string_of_int
@@ -250,22 +223,14 @@ let check (globals, functions) =
       let rt = get_sexpr_type se in
       if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
          string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))
-    in
 
-    let check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
+    and check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
       then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
-      else () in
+      else ()
 
-    let check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
+    and check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
       then raise (Failure ("expected integer expression in " ^ string_of_expr e))
       else () in
-
-    let check_var_decl = function
-      Int | Bool | Float | Char | String -> ()
-      | Void -> raise (Failure ("cannot declare a void type variable"))
-      | Vector(_, e) -> check_int_expr e
-      | Matrix(_, e1, e2) -> check_int_expr e1; check_int_expr e2
-    in
 
     (* Return a sstmt given a stmt *)
     let rec stmt_to_sstmt = function
@@ -290,16 +255,23 @@ let check (globals, functions) =
       | Continue -> SContinue
     in
 
+    (* check variable declaration type *)
+    let check_var_decl (t, id) = match t with
+      Int | Bool | Float | Char | String -> (t, id)
+      | Void -> raise (Failure ("cannot declare a void type variable"))
+      | Vector(_, e) -> check_int_expr e; (t, id)
+      | Matrix(_, e1, e2) -> check_int_expr e1; check_int_expr e2; (t, id)
+    in
+
     { 
       styp = func.typ;
       sfname = func.fname;
       sformals = func.formals;
-      slocals = func.locals;
+      slocals = List.map check_var_decl func.locals;
       sbody = List.map stmt_to_sstmt func.body;
     }
    
   in 
-  (* ignore(List.iter check_function functions); *)
   let sfdecls = List.map fdecl_to_sfdecl functions in
   (globals, sfdecls)
 

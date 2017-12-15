@@ -29,6 +29,6 @@ let file_to_string file =
   match action with
     Ast -> print_string (Ast.string_of_program ast)
   | LLVM_IR -> print_string (Llvm.string_of_llmodule (Codegen.translate sast))
-  | Compile -> let m = Codegen.translate ast in
+  | Compile -> let m = Codegen.translate sast in
     Llvm_analysis.assert_valid_module m;
     print_string (Llvm.string_of_llmodule m)
