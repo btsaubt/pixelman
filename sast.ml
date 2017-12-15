@@ -6,6 +6,7 @@ open Ast
 type sexpr =
     SInt_Literal of int
   | SFloat_Literal of float
+  | SChar_Literal of char
   | SString_Literal of string
   | SBool_Literal of bool
   | SId of string * typ
