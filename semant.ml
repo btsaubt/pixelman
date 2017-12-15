@@ -79,9 +79,6 @@ let check (globals, functions) =
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
 
-    List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
-      " in " ^ func.fname)) func.locals;
-
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
 
@@ -111,8 +108,8 @@ let check (globals, functions) =
         | SBinop(_,_,_,t) -> t
         | SUnop(_,_,t) -> t
         | SAssign(_,_,t) -> t
-        (* | SVecAccess(_,_,t) -> t
-        | SMatAccess(_,_,_,t) -> t *)
+        | SVecAccess(_,_,t) -> t
+        | SMatAccess(_,_,_,t) -> t
         | SCall(_,_,t) -> t
         | SNoexpr -> Void
     in
@@ -186,8 +183,8 @@ let check (globals, functions) =
 (*      | Pixel(r, g, b, x, y) -> Pixel 
       | Image(h, w) -> Image *)
       | Id s -> SId(s, type_of_identifier s)
-(*      | VecAccess(v, e) -> access_type (type_of_identifier v)
-      | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v) *)
+      | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, e, access_type (type_of_identifier v))
+      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, e1, e2, access_type (type_of_identifier v))
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
@@ -226,22 +223,14 @@ let check (globals, functions) =
       let rt = get_sexpr_type se in
       if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
          string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))
-    in
 
-    let check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
+    and check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
       then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
-      else () in
+      else ()
 
-    let check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
+    and check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
       then raise (Failure ("expected integer expression in " ^ string_of_expr e))
       else () in
-
-    let check_var_decl = function
-      Int | Bool | Float | Char | String -> ()
-      | Void -> raise (Failure ("cannot declare a void type variable"))
-      | Vector(_, e) -> check_int_expr e
-      | Matrix(_, e1, e2) -> check_int_expr e1; check_int_expr e2
-    in
 
     (* Return a sstmt given a stmt *)
     let rec stmt_to_sstmt = function
@@ -266,11 +255,19 @@ let check (globals, functions) =
       | Continue -> SContinue
     in
 
+    (* check variable declaration type *)
+    let check_var_decl (t, id) = match t with
+      Int | Bool | Float | Char | String -> (t, id)
+      | Void -> raise (Failure ("cannot declare a void type variable"))
+      | Vector(_, e) -> check_int_expr e; (t, id)
+      | Matrix(_, e1, e2) -> check_int_expr e1; check_int_expr e2; (t, id)
+    in
+
     { 
       styp = func.typ;
       sfname = func.fname;
       sformals = func.formals;
-      slocals = func.locals;
+      slocals = List.map check_var_decl func.locals;
       sbody = List.map stmt_to_sstmt func.body;
     }
    
