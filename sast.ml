@@ -13,8 +13,8 @@ type sexpr =
   | SBinop of sexpr * op * sexpr * typ
   | SUnop of uop * sexpr * typ
   | SAssign of string * sexpr * typ
-(*  | SVecAccess of string * expr * typ
-  | SMatAccess of string * expr * expr * typ *)
+  | SVecAccess of string * expr * typ
+  | SMatAccess of string * expr * expr * typ
   | SCall of string * sexpr list * typ
   | SNoexpr
 

@@ -109,8 +109,8 @@ let check (globals, functions) =
         | SBinop(_,_,_,t) -> t
         | SUnop(_,_,t) -> t
         | SAssign(_,_,t) -> t
-        (* | SVecAccess(_,_,t) -> t
-        | SMatAccess(_,_,_,t) -> t *)
+        | SVecAccess(_,_,t) -> t
+        | SMatAccess(_,_,_,t) -> t
         | SCall(_,_,t) -> t
         | SNoexpr -> Void
     in
@@ -184,8 +184,8 @@ let check (globals, functions) =
 (*      | Pixel(r, g, b, x, y) -> Pixel 
       | Image(h, w) -> Image *)
       | Id s -> SId(s, type_of_identifier s)
-(*      | VecAccess(v, e) -> access_type (type_of_identifier v)
-      | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v) *)
+      | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, e, access_type (type_of_identifier v))
+      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, e1, e2, access_type (type_of_identifier v))
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
          (* let se1 = expr_to_sexpr e1 and se2 = expr_to_sexpr e2 in (match op with
             Add | Sub | Mult | Div |
@@ -247,13 +247,12 @@ let check (globals, functions) =
       let rt = get_sexpr_type se in
       if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
          string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))
-    in
 
-    let check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
+    and check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
       then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
-      else () in
+      else ()
 
-    let check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
+    and check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
       then raise (Failure ("expected integer expression in " ^ string_of_expr e))
       else () in
 
