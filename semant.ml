@@ -36,16 +36,13 @@ let check (globals, functions) =
   (**** Checking Functions ****)
 
   let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
-                                 "display"; "resize"; "transform"] in
+                                 "display"; "resize"; "transform"; "print_float"] in
   let rec check_protected = function
     [] -> ()
     | h :: t -> if List.mem h (List.map (fun fd -> fd.fname) functions)
         then raise (Failure ("function" ^ h ^ "may not be defined"))
         else ignore (check_protected t)
   in check_protected protected_functions;
-
-  (*if List.mem "print" (List.map (fun fd -> fd.fname) functions)
-  then raise (Failure ("function print may not be defined")) else ();*)
 
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
@@ -57,9 +54,11 @@ let check (globals, functions) =
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
        locals = []; body = [] } (StringMap.add "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
-       locals = []; body = [] } (StringMap.singleton "print_string"
+       locals = []; body = [] } (StringMap.add "print_string"
      { typ = Void; fname = "print_string"; formals = [(String, "x")];
-       locals = []; body = [] })))
+       locals = []; body = [] } (StringMap.singleton "print_float" 
+     { typ = Void; fname = "print_float"; formals = [(Float, "x")];
+       locals = []; body = [] } ))))
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -190,32 +189,9 @@ let check (globals, functions) =
 (*      | VecAccess(v, e) -> access_type (type_of_identifier v)
       | MatAccess(v, e1, e2) ->  access_type (type_of_identifier v) *)
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
-         (* let se1 = expr_to_sexpr e1 and se2 = expr_to_sexpr e2 in (match op with
-            Add | Sub | Mult | Div |
-            Bitor | Shiftleft 
-        | Shiftright | Bitand | Bitxor | Mod | Divint
-          when t1 = Int && t2 = Int -> Int
-  | Equal | Neq when t1 = t2 -> Bool
-  | Less | Leq | Greater | Geq when t1 = Int && t2 = Int || t1 = Float && t2 = Float -> Bool
-        | And | Or when t1 = Bool && t2 = Bool -> Bool
-        | _ -> raise (Failure ("illegal binary operator " ^
-              string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-              string_of_typ t2 ^ " in " ^ string_of_expr e))
-        ) *)
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
-      (* let t = check_expr e in
-   (match op with
-     Neg when t = Int -> Int
-   | Not when t = Bool -> Bool
-         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
-           string_of_typ t ^ " in " ^ string_of_expr ex))) *)
       | Noexpr -> SNoexpr
       | Assign(var, e) (* as ex *) -> get_assign_sexpr var e
-      (* let lt = type_of_identifier var
-                                and rt = check_expr e in
-        check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
-             " = " ^ string_of_typ rt ^ " in " ^ 
-             string_of_expr ex)) *)
       | Call(fname, actuals) as call -> let fd = function_decl fname in
          if List.length actuals != List.length fd.formals then
            raise (Failure ("expecting " ^ string_of_int
@@ -299,7 +275,6 @@ let check (globals, functions) =
     }
    
   in 
-  (* ignore(List.iter check_function functions); *)
   let sfdecls = List.map fdecl_to_sfdecl functions in
   (globals, sfdecls)
 
