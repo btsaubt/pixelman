@@ -153,17 +153,17 @@ expr:
 */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
-  /* | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
+  | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
   | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
-*/
+
 
 primitive_literals:
     INT_LITERAL      { Int_Literal($1) }
   | STRING_LITERAL   { String_Literal($1) }
   | FLOAT_LITERAL    { Float_Literal($1) }
   | CHAR_LITERAL     { Char_Literal($1) }
-  | TRUE             { BoolLit(true) }
-  | FALSE            { BoolLit(false) }
+  | TRUE             { Bool_Literal(true) }
+  | FALSE            { Bool_Literal(false) }
 
 literals: 
   primitive_literals { $1 } 

@@ -15,14 +15,16 @@ type expr =
   | Matrix_Literal of expr list list 
   | Pixel of expr * expr * expr * expr * expr
   | Image of expr * expr 
-  | BoolLit of bool
+  (* | Pixel of expr * expr * expr * expr * expr
+  | Image of expr * expr *) 
+  | Bool_Literal of bool
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Assign of string * expr
   | Call of string * expr list
-(*  | VecAccess of string * expr
-  | MatAccess of string * expr * expr *)
+  | VecAccess of string * expr
+  | MatAccess of string * expr * expr
   | Noexpr
 
 type typ = Int | Bool | Float | Char | String | Void | (*Image | Pixel |*) Vector of typ * expr | Matrix of typ * expr * expr
@@ -97,13 +99,11 @@ let rec string_of_expr = function
   | String_Literal(s) -> s
   | Vector_Literal(el) -> string_of_vector el   
 
-  (*| Pixel(r, g, b, x, y) -> "Pixel(" ^ string_of_expr r ^ ", " ^ string_of_expr g ^ ", " ^ 
+  (* | Pixel(r, g, b, x, y) -> "Pixel(" ^ string_of_expr r ^ ", " ^ string_of_expr g ^ ", " ^ 
                             string_of_expr b ^ ", " ^ string_of_expr x ^ ", " ^ 
                             string_of_expr y 
   | Image(h, w) -> string_of_expr h ^ ", " ^ string_of_expr w
   *)  
-  | BoolLit(true) -> "true"
-  | BoolLit(false) -> "false"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -112,9 +112,9 @@ let rec string_of_expr = function
   | Assign(v, e2) -> v ^ " = " ^ string_of_expr e2
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-(*  | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
+  | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
   | MatAccess(v, e1, e2) -> v ^ "[" ^ string_of_expr e1 ^ "]" ^ 
-                                "[" ^ string_of_expr e2 ^ "]" *)
+                                "[" ^ string_of_expr e2 ^ "]"
   | Noexpr -> ""
 
 let rec string_of_stmt = function

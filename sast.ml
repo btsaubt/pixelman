@@ -6,14 +6,15 @@ open Ast
 type sexpr =
     SInt_Literal of int
   | SFloat_Literal of float
+  | SChar_Literal of char
   | SString_Literal of string
   | SBool_Literal of bool
-  | SId of string
+  | SId of string * typ
   | SBinop of sexpr * op * sexpr * typ
   | SUnop of uop * sexpr * typ
   | SAssign of string * sexpr * typ
-(*  | SVecAccess of string * expr
-  | SMatAccess of string * expr * expr *)
+  | SVecAccess of string * expr * typ
+  | SMatAccess of string * expr * expr * typ
   | SCall of string * sexpr list * typ
   | SNoexpr
 
