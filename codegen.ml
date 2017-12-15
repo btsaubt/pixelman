@@ -23,7 +23,7 @@ let translate (globals, functions) =
   and i32_t  = L.i32_type   context
   and i8_t   = L.i8_type    context
   and i1_t   = L.i1_type    context
-  and f_t    = L.float_type context
+  and f_t    = L.double_type context
   and void_t = L.void_type  context in
 
   let ltype_of_typ = function
@@ -37,7 +37,10 @@ let translate (globals, functions) =
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
     let global_var m (t, n) =
-      let init = L.const_int (ltype_of_typ t) 0
+            let init = if ltype_of_typ t != f_t then
+                           L.const_int (ltype_of_typ t) 0
+                       else
+                           L.const_float (ltype_of_typ t) 0.0
       in StringMap.add n (L.define_global n init the_module) m in
     List.fold_left global_var StringMap.empty globals in
 
@@ -66,7 +69,8 @@ let translate (globals, functions) =
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
     let string_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
-    
+    let float_format_str = L.build_global_stringptr "%f\n" "fmt" builder in
+
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
@@ -92,7 +96,7 @@ let translate (globals, functions) =
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
 	A.Int_Literal i -> L.const_int i32_t i
-      | A.Float_Literal f -> L.const_float f_t f
+      | A.Float_Literal fl -> L.const_float f_t fl
       | A.Char_Literal c -> L.const_int i8_t (Char.code c)
       | A.String_Literal s -> L.build_global_stringptr s "s" builder
       | A.Bool_Literal b -> L.const_int i1_t (if b then 1 else 0)
@@ -105,20 +109,20 @@ let translate (globals, functions) =
 	  (*  A.Add     -> L.build_add *)
             A.Add -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
                       (match e1_type_string with 
-                         "float" -> L.build_fadd 
+                         "double" -> L.build_fadd 
                           | "i32" -> L.build_add)) 
           | A.Sub      -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
-                            "float" -> L.build_fsub
+                            "double" -> L.build_fsub
                             | "i32"  -> L.build_sub))
           | A.Mod     -> L.build_urem
           | A.Mult    -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
-                          "float" -> L.build_fmul
+                          "double" -> L.build_fmul
                           | "i32"  -> L.build_mul))
           | A.Div     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
-                             "float" -> L.build_fdiv
+                             "double" -> L.build_fdiv
                              | "i32"  -> L.build_sdiv))
 	  | A.And     -> L.build_and
 	  | A.Or      -> L.build_or
@@ -126,27 +130,27 @@ let translate (globals, functions) =
           | A.Shiftleft -> L.build_shl
           | A.Equal   -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
-                          "float" -> L.build_fcmp L.Fcmp.Oeq
+                          "double" -> L.build_fcmp L.Fcmp.Oeq
                           | "i32" -> L.build_icmp L.Icmp.Eq)) 
           | A.Neq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with
-                          "float" -> L.build_fcmp L.Fcmp.One
+                          "double" -> L.build_fcmp L.Fcmp.One
                           | "i32" -> L.build_icmp L.Icmp.Ne))
           | A.Less    -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
-                          "float" -> L.build_fcmp L.Fcmp.Olt
+                          "double" -> L.build_fcmp L.Fcmp.Olt
                           | "i32" -> L.build_icmp L.Icmp.Slt))
           | A.Leq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
                           (match e1_type_string with 
-                          "float" -> L.build_fcmp L.Fcmp.Ole
+                          "double" -> L.build_fcmp L.Fcmp.Ole
                            | "i32"   -> L.build_icmp L.Icmp.Sle)) 
           | A.Greater -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
                           (match e1_type_string with 
-                          "float" -> L.build_fcmp L.Fcmp.Ogt
-                           | "132"   -> L.build_icmp L.Icmp.Sgt))
+                          "double" -> L.build_fcmp L.Fcmp.Ogt
+                           | "i32"   -> L.build_icmp L.Icmp.Sgt))
           | A.Geq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
-                          "float" -> L.build_fcmp L.Fcmp.Oge
+                          "double" -> L.build_fcmp L.Fcmp.Oge
                            | "i32"   -> L.build_icmp L.Icmp.Sge)) 
 	  ) e1' e2' "tmp" builder
       | A.Unop(op, e) ->
@@ -156,14 +160,17 @@ let translate (globals, functions) =
           | A.Not     -> L.build_not) e' "tmp" builder
       | A.Assign (s, e) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
-      | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
-	    "printf" builder
-      | A.Call ("print_string", [e]) | A.Call ("print_string", [e]) ->
-    L.build_call printf_func [| string_format_str ; (expr builder e) |]
-      "printf" builder
+      | A.Call ("print", [e]) ->
+	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
+	        "printf" builder
+      | A.Call ("print_string", [e]) ->
+                L.build_call printf_func [| string_format_str ; (expr builder e) |]
+                "print_string" builder
+      | A.Call ("print_float", [e]) ->
+                L.build_call printf_func [| float_format_str ; (expr builder e) |]
+                "print_float" builder
       | A.Call ("printbig", [e]) ->
-	  L.build_call printbig_func [| (expr builder e) |] "printbig" builder
+	        L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
