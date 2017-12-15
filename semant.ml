@@ -80,9 +80,6 @@ let check (globals, functions) =
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
 
-    List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
-      " in " ^ func.fname)) func.locals;
-
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
 
@@ -260,13 +257,6 @@ let check (globals, functions) =
       then raise (Failure ("expected integer expression in " ^ string_of_expr e))
       else () in
 
-    let check_var_decl = function
-      Int | Bool | Float | Char | String -> ()
-      | Void -> raise (Failure ("cannot declare a void type variable"))
-      | Vector(_, e) -> check_int_expr e
-      | Matrix(_, e1, e2) -> check_int_expr e1; check_int_expr e2
-    in
-
     (* Return a sstmt given a stmt *)
     let rec stmt_to_sstmt = function
 	    Block(sl) -> let rec check_block = function (* just check if return statement is end of block *)
@@ -290,11 +280,19 @@ let check (globals, functions) =
       | Continue -> SContinue
     in
 
+    (* check variable declaration type *)
+    let check_var_decl (t, id) = match t with
+      Int | Bool | Float | Char | String -> (t, id)
+      | Void -> raise (Failure ("cannot declare a void type variable"))
+      | Vector(_, e) -> check_int_expr e; (t, id)
+      | Matrix(_, e1, e2) -> check_int_expr e1; check_int_expr e2; (t, id)
+    in
+
     { 
       styp = func.typ;
       sfname = func.fname;
       sformals = func.formals;
-      slocals = func.locals;
+      slocals = List.map check_var_decl func.locals;
       sbody = List.map stmt_to_sstmt func.body;
     }
    
