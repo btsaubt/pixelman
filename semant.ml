@@ -71,7 +71,7 @@ let check (globals, functions) =
 
   let _ = function_decl "main" in (* Ensure "main" is defined *)
 
-  let check_function func =
+  let fdecl_to_sfdecl func =
 
     List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
       " in " ^ func.fname)) func.formals;
@@ -111,18 +111,16 @@ let check (globals, functions) =
         | (Bool, Bool) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
       in sexpr (t1, t2)
-    in
 
-    let get_unop_boolean_sexpr se op =
+    and get_unop_boolean_sexpr se op =
       let t = get_sexpr_type se in
       let sexpr = function
         Int -> SUnop(op, se, Bool)
         | Bool -> SUnop(op, se, Bool)
         | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
       in sexpr t
-    in
 
-    let get_binop_arithmetic_sexpr se1 se2 op = 
+    and get_binop_arithmetic_sexpr se1 se2 op = 
       let t1 = get_sexpr_type se1 in
       let t2 = get_sexpr_type se2 in
       let sexpr = function
@@ -132,27 +130,24 @@ let check (globals, functions) =
         | (Float, Float) -> SBinop(se1, op, se2, Float)
         | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
       in sexpr (t1, t2)
-    in
 
-    let get_unop_arithmetic_sexpr se op = 
+    and get_unop_arithmetic_sexpr se op = 
       let t = get_sexpr_type se in
       let sexpr = function
         Int  -> SUnop(op, se, Int)
         | Float -> SUnop(op, se, Float)
         | _ -> raise (Failure ("can only perform unary arithmetic operators with Int/Float variables or matrices"))
       in sexpr t
-    in
 
-    let get_binop_bitwise_sexpr se1 se2 op = 
+    and get_binop_bitwise_sexpr se1 se2 op = 
       let t1 = get_sexpr_type se1 in
       let t2 = get_sexpr_type se2 in
       let sexpr = function
         (Int, Int) -> SBinop(se1, op, se2, Int)
         | _ -> raise (Failure ("can only perform bitwise operations on integer types"))
       in sexpr (t1 t2)
-    in
 
-    let get_binop_comparison_sexpr se1 se2 op = 
+    and get_binop_comparison_sexpr se1 se2 op = 
       let t1 = get_sexpr_type se1 in
       let t2 = get_sexpr_type se2 in
       let sexpr = function
@@ -160,9 +155,8 @@ let check (globals, functions) =
         | (Float, Float) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only compare ints/floats with themselves for inequalities"))
       in sexpr (t1, t2)
-    in
 
-    let get_equality_type se1 se2 op = 
+    and get_equality_type se1 se2 op = 
       let t1 = get_sexpr_type se1 in
       let t2 = get_sexpr_type se2 in
       let sexpr = function
@@ -171,9 +165,8 @@ let check (globals, functions) =
         | (Char, Char) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only compare ints/floats/chars with themselves for equality"))
       in sexpr (t1, t2)
-    in
 
-    let get_sexpr_type se = match se with
+    and get_sexpr_type se = match se with
         SInt_Literal(_) -> Int
         | SFloat_Literal(_) -> Float
         | SString_Literal(_) -> String
@@ -209,8 +202,8 @@ let check (globals, functions) =
 
     and get_assign_sexpr var e =
       let lt = type_of_identifier var
-      and let se = expr_to_sexpr e
-      and let rt = get_sexpr_type se in
+      and se = expr_to_sexpr e
+      and rt = get_sexpr_type se in
       if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
          string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))
 
@@ -267,23 +260,23 @@ let check (globals, functions) =
     in
 
     let check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
-     then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
-     else () in
+      then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
+      else () in
 
     let check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
-     then raise (Failure ("expected integer expression in " ^ string_of_expr e))
-     else () in
+      then raise (Failure ("expected integer expression in " ^ string_of_expr e))
+      else () in
 
     (* Return a sstmt given a stmt *)
     let rec stmt_to_sstmt = function
-	  Block(sl) -> (* let rec check_block = function
-           [Return _ as s] -> check_stmt s
+	    Block(sl) -> let rec check_block = function
+           [Return _ as s] -> ()
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
-         | s :: ss -> check_stmt s ; check_block ss
+         | s :: ss -> stmt_to_sstmt s ; check_block ss
          | [] -> ()
-        in check_block sl *)
-        SBlock(List.map stmt_to_sstmt sl)
+        in 
+        ignore check_block sl; SBlock(List.map stmt_to_sstmt sl)
       | Expr(e) -> expr_to_sexpr e
       | Return(e) -> let se = expr_to_sexpr e in 
         let t = get_sexpr_type se in
@@ -295,10 +288,10 @@ let check (globals, functions) =
       | While(p, s) -> check_bool_expr p; SWhile(expr_to_sexpr p, stmt_to_sstmt s)
     in
 
-    check_stmt (Block func.body)
+    { styp = func.typ; sfname = func.fname; sformals = func.formals; slocals = f.locals; sbody = stmt_to_sstmt (Block func.body); }
    
   in 
-  ignore(List.iter check_function functions);
+  (* ignore(List.iter check_function functions); *)
   let sfdecls = List.map fdecl_to_sfdecl functions in
   (globals, sfdecls)
 
