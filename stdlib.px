@@ -1,8 +1,8 @@
 def string printb(bool b){
-    if(b == 1){
+    if(b){
         print_string("True");
     }
     else{
-        print_string("false");
+        print_string("False");
     }
 }
