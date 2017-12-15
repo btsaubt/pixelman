@@ -11,6 +11,10 @@ type expr =
   | Float_Literal of float
   | Char_Literal of char
   | String_Literal of string 
+  | Vector_Literal of expr list 
+  | Matrix_Literal of expr list list 
+  | Pixel of expr * expr * expr * expr * expr
+  | Image of expr * expr 
   (* | Pixel of expr * expr * expr * expr * expr
   | Image of expr * expr *) 
   | Bool_Literal of bool
@@ -74,17 +78,32 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
 
+let string_of_vector el = 
+  let rec string_of_vector_literal = function
+      [] -> "]" 
+    | [hd] -> (match hd with
+              Int_Literal(i) -> string_of_int i 
+            | Float_Literal(f) -> string_of_float f
+            | _ -> raise( Failure("Illegal type for vector list")))
+    | hd::tl -> (match hd with 
+                  Int_Literal(i) -> string_of_int i ^ ", " 
+                | Float_Literal(f) -> string_of_float f ^ ", "
+                | _ -> raise( Failure("Illegal type for vector list")))
+  in 
+  "[" ^ string_of_vector_literal el 
+
 let rec string_of_expr = function
     Int_Literal(i) -> string_of_int i
   | Float_Literal(f) -> string_of_float f
   | Char_Literal(c) -> Char.escaped c
   | String_Literal(s) -> s
+  | Vector_Literal(el) -> string_of_vector el   
+
   (* | Pixel(r, g, b, x, y) -> "Pixel(" ^ string_of_expr r ^ ", " ^ string_of_expr g ^ ", " ^ 
                             string_of_expr b ^ ", " ^ string_of_expr x ^ ", " ^ 
                             string_of_expr y 
-  | Image(h, w) -> string_of_expr h ^ ", " ^ string_of_expr w *)
-  | Bool_Literal(true) -> "true"
-  | Bool_Literal(false) -> "false"
+  | Image(h, w) -> string_of_expr h ^ ", " ^ string_of_expr w
+  *)  
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2

@@ -33,7 +33,12 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Char -> i8_t
     | A.String -> i32_t
-    | A.Void -> void_t in
+    | A.Void -> void_t 
+    (*| A.Vector(typ, size) -> (match typ with 
+                             A.Int -> array_t i32_t size
+                            | A.Float -> array_t float_t size 
+                            | _ -> raise(Failure("Cannot make type")))
+  *)in
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -111,48 +116,58 @@ let translate (globals, functions) =
             A.Add -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
                       (match e1_type_string with 
                          "double" -> L.build_fadd 
-                          | "i32" -> L.build_add)) 
+                       | "i32" -> L.build_add
+                       | _ -> raise(Failure("Illegal type operation")) )) 
           | A.Sub      -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
                             "double" -> L.build_fsub
-                            | "i32"  -> L.build_sub))
+                          | "i32"  -> L.build_sub
+                          | _ -> raise(Failure("Illegal type operation")) ))
           | A.Mod     -> L.build_urem
           | A.Mult    -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
                           "double" -> L.build_fmul
-                          | "i32"  -> L.build_mul))
+                           | "i32"  -> L.build_mul
+                           | _ -> raise(Failure("illegal type operation")) ))
           | A.Div     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
                              "double" -> L.build_fdiv
-                             | "i32"  -> L.build_sdiv))
-	  | A.And     -> L.build_and
+                           | "i32"  -> L.build_sdiv
+                           | _ -> raise(Failure("illegal type operation")) ))
+          | A.And     -> L.build_and
 	  | A.Or      -> L.build_or
           | A.Shiftright -> L.build_lshr
           | A.Shiftleft -> L.build_shl
           | A.Equal   -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
                           "double" -> L.build_fcmp L.Fcmp.Oeq
-                          | "i32" -> L.build_icmp L.Icmp.Eq)) 
+                           | "i32" -> L.build_icmp L.Icmp.Eq
+                           | _ -> raise(Failure("Illegal type operation")) )) 
           | A.Neq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with
                           "double" -> L.build_fcmp L.Fcmp.One
-                          | "i32" -> L.build_icmp L.Icmp.Ne))
+                           | "i32" -> L.build_icmp L.Icmp.Ne
+                           | _ -> raise(Failure("Illegal type operation")) ))
           | A.Less    -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
                           "double" -> L.build_fcmp L.Fcmp.Olt
-                          | "i32" -> L.build_icmp L.Icmp.Slt))
+                           | "i32" -> L.build_icmp L.Icmp.Slt
+                           | _ -> raise(Failure("Illegal type operation")) ))
           | A.Leq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
                           (match e1_type_string with 
                           "double" -> L.build_fcmp L.Fcmp.Ole
-                           | "i32"   -> L.build_icmp L.Icmp.Sle)) 
+                           | "i32"   -> L.build_icmp L.Icmp.Sle
+                           | _ -> raise(Failure("Illegal type operation")) )) 
           | A.Greater -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in
                           (match e1_type_string with 
                           "double" -> L.build_fcmp L.Fcmp.Ogt
-                           | "i32"   -> L.build_icmp L.Icmp.Sgt))
+                           | "i32"   -> L.build_icmp L.Icmp.Sgt
+                           | _ -> raise(Failure("Illegal type operation" )) ))
           | A.Geq     -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
                           (match e1_type_string with 
                           "double" -> L.build_fcmp L.Fcmp.Oge
-                           | "i32"   -> L.build_icmp L.Icmp.Sge)) 
+                           | "i32"   -> L.build_icmp L.Icmp.Sge
+                           | _ -> raise(Failure("Illegal type operation" )) )) 
 	  ) e1' e2' "tmp" builder
       | S.SUnop(op, e, _) ->
 	  let e' = expr builder e in

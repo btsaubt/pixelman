@@ -5,10 +5,14 @@
 let character = [' '-'!' '#'-'[' ']'-'~'] | ('\\' ['\\' ''' '"' 'n' 'r' 't'])
 let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\n' '\r'] 
+let float_lit = ('-'?) (digit*) ['.'] digit+
+let int_lit = ('-'?) digit+
 
 rule token = parse
   whitespace { token lexbuf }             (* Whitespace *)
-  | ":)"     { comment lexbuf }           (* Comments *)
+  (*| "(:"     { comment lexbuf }           (* Comments *)
+  *)
+  | ":)"     { comment lexbuf } 
     (* Separators *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
@@ -85,20 +89,28 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
-(*| "Pixel"  { PIXEL } 
+(*| "matrix" { MATRIX } 
+| "vector" { VECTOR } 
+
+| "Pixel"  { PIXEL } 
 | "Image"  { IMAGE } *)
 
 (* Literals *)
-| ('-'?) digit+    as lxm    { INT_LITERAL(int_of_string lxm) }
+| int_lit   as lxm    { INT_LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | ''' character '''    as lxm    { CHAR_LITERAL(lxm.[1]) }
 | '"' ((character*) as lxm) '"' { STRING_LITERAL(lxm) }
-| ('-'?) (digit*) ['.'] digit+ as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
-
+| float_lit as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
+(*| '{' int_lit as lxm '}' { VECTOR_LITERAL(int_of_string lxm) } 
+*)
 (* Comment *) 
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
+(*and comment = parse 
+  ":)" { token lexbuf } 
+  | _  { comment lexbuf } 
+*)
 and comment = parse
   | '\n' { token lexbuf }
   | _    { comment lexbuf }

@@ -9,6 +9,7 @@ open Ast
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL
 IMAGE
+ 
 %token NOVECLBRACKET
 %token BREAK CONTINUE
 %token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
@@ -17,7 +18,8 @@ IMAGE
 %token <char> CHAR_LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> STRING_LITERAL
-%token EOF
+/*%token <list> VECTOR_LITERAL
+*/%token EOF
 
 %nonassoc NOELSE
 %nonassoc ELSE
@@ -72,10 +74,6 @@ typ:
   | CHAR { Char } 
   | STRING { String } 
   | VOID { Void }
-  /*| PIXEL { Pixel } 
-  | IMAGE { Image } */
-  | vec_t { $1 }
-  | mat_t { $1 }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -83,13 +81,21 @@ vdecl_list:
 
 vdecl:
    typ ID SEMI { ($1, $2) }
+   | vec_t { $1 } 
+   | mat_t { $1 } 
 
-vec_t:
-   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) } /* must be given precedence for no S/R errors */
+vec_t: 
+  typ LBRACKET expr RBRACKET ID SEMI { (Vector($1, $3), $5) }  
 
+mat_t: 
+  typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET ID SEMI { (Matrix($1, $3, $6), $8) } 
+
+/*vec_t:
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) } must be given precedence for no S/R errors
+   
 mat_t:
    typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
-
+*/
 stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { $2 :: $1 }
@@ -111,13 +117,8 @@ expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
 
-expr:
-    INT_LITERAL      { Int_Literal($1) }
-  | STRING_LITERAL   { String_Literal($1) }
-  | FLOAT_LITERAL    { Float_Literal($1) } 
-  | CHAR_LITERAL     { Char_Literal($1) } 
-  | TRUE             { Bool_Literal(true) }
-  | FALSE            { Bool_Literal(false) }
+expr: 
+  literals { $1 } 
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
@@ -155,6 +156,27 @@ expr:
   | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
   | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
 
+
+primitive_literals:
+    INT_LITERAL      { Int_Literal($1) }
+  | STRING_LITERAL   { String_Literal($1) }
+  | FLOAT_LITERAL    { Float_Literal($1) }
+  | CHAR_LITERAL     { Char_Literal($1) }
+  | TRUE             { Bool_Literal(true) }
+  | FALSE            { Bool_Literal(false) }
+
+literals: 
+  primitive_literals { $1 } 
+  | LBRACKET array_literal RBRACKET { Vector_Literal(List.rev $2) } 
+  | LBRACKET OR multiple_vectors OR RBRACKET { Matrix_Literal(List.rev $3) }
+
+multiple_vectors: 
+  | array_literal { [$1] } 
+  | multiple_vectors OR array_literal { $3 :: $1 } 
+
+array_literal: 
+  literals { [$1] } 
+  | array_literal COMMA literals { $3 :: $1 } 
 
 actuals_opt:
     /* nothing */ { [] }

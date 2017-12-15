@@ -1,0 +1,8 @@
+def string printb(bool b){
+    if(b == 1){
+        print_string("True");
+    }
+    else{
+        print_string("false");
+    }
+}
