@@ -76,11 +76,27 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
 
+let string_of_vector el = 
+  let rec string_of_vector_literal = function
+      [] -> "]" 
+    | [hd] -> (match hd with
+              Int_Literal(i) -> string_of_int i 
+            | Float_Literal(f) -> string_of_float f
+            | _ -> raise( Failure("Illegal type for vector list")))
+    | hd::tl -> (match hd with 
+                  Int_Literal(i) -> string_of_int i ^ ", " 
+                | Float_Literal(f) -> string_of_float f ^ ", "
+                | _ -> raise( Failure("Illegal type for vector list")))
+  in 
+  "[" ^ string_of_vector_literal el 
+
 let rec string_of_expr = function
     Int_Literal(i) -> string_of_int i
   | Float_Literal(f) -> string_of_float f
   | Char_Literal(c) -> Char.escaped c
   | String_Literal(s) -> s
+  | Vector_Literal(el) -> string_of_vector el   
+
   (*| Pixel(r, g, b, x, y) -> "Pixel(" ^ string_of_expr r ^ ", " ^ string_of_expr g ^ ", " ^ 
                             string_of_expr b ^ ", " ^ string_of_expr x ^ ", " ^ 
                             string_of_expr y 

@@ -24,6 +24,7 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type    context
   and i1_t   = L.i1_type    context
   and f_t    = L.float_type context
+  and array_t = L.array_type
   and void_t = L.void_type  context in
 
   let ltype_of_typ = function
@@ -32,7 +33,12 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Char -> i8_t
     | A.String -> i32_t
-    | A.Void -> void_t in
+    | A.Void -> void_t 
+    (*| A.Vector(typ, size) -> (match typ with 
+                             A.Int -> array_t i32_t size
+                            | A.Float -> array_t float_t size 
+                            | _ -> raise(Failure("Cannot make type")))
+  *)in
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
