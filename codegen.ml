@@ -33,7 +33,9 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Char -> i8_t
     | A.String -> i32_t
-    | A.Void -> void_t 
+    | A.Void -> void_t
+    | A.Vector(t, e) -> ltype
+    | A.Matrix(t, e, e) -> 
     (*| A.Vector(typ, size) -> (match typ with 
                              A.Int -> array_t i32_t size
                             | A.Float -> array_t float_t size 
