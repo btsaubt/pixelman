@@ -171,6 +171,15 @@ let check (globals, functions) =
         | (Float, Float) -> SBinop(se1, op, se2, Bool)
         | (Char, Char) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only compare ints/floats/chars with themselves for equality"))
+
+    (* and check_vector_types el =
+      let vec_typ = 
+        let first_el = hd el in
+        let check_first_el fe = match fe with
+          Float | Int -> first_el
+
+    and check_matrix_types = *)
+
     in
 
     (* Return an sexpr given an expr *)
@@ -180,8 +189,8 @@ let check (globals, functions) =
       | Float_Literal(f) -> SFloat_Literal(f)
       | Bool_Literal(b) -> SBool_Literal(b)
       | Char_Literal(c) -> SChar_Literal(c)
-(*      | Pixel(r, g, b, x, y) -> Pixel 
-      | Image(h, w) -> Image *)
+      (* | Vector_Literal(el) -> SVector_Literal(check_vector_types el)
+      | Matrix_Literal(el) -> SMatrix_Literal(check_matrix_types el) *)
       | Id s -> SId(s, type_of_identifier s)
       | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, e, access_type (type_of_identifier v))
       | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, e1, e2, access_type (type_of_identifier v))
