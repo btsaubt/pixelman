@@ -1,0 +1,12 @@
+def int foo() {}
+
+def void bar() {}
+
+def int print_string() {} :) Should not be able to define print_string
+
+def void baz() {}
+
+def int main()
+{
+  return 0;
+}

@@ -6,3 +6,31 @@ def string printb(bool b){
         print_string("False");
     }
 }
+
+def Image greyscale(Image im, int width, int height){
+	int i;
+	int j;
+	Image newImage = im;
+	for(i = 0; i < height; i = i + 1){
+		for(j = 0; j < width; j = j + 1){
+			newImage.r[i][j] = (im.r[i][j] + im.g[i][j] + im.b[i][j])/3;
+			newImage.g[i][j] = (im.r[i][j] + im.g[i][j] + im.b[i][j])/3;
+			newImage.b[i][j] = (im.r[i][j] + im.g[i][j] + im.b[i][j])/3;
+		}
+	}
+	return newImage;
+}
+
+def Image sepia(Image im, int width, int height){
+	int i;
+	int j;
+	Image newImage = im;
+	for(i = 0; i < height; i = i + 1){
+		for(j = 0; j < width; j = j + 1){
+			newImage.r[i][j] = im.r[i][j]*.393 + im.g[i][j]*.769 + im.b[i][j]*.189;
+			newImage.g[i][j] = im.r[i][j]*.349 + im.g[i][j]*.686 + im.b[i][j]*.168;
+			newImage.b[i][j] = im.r[i][j]*.272 + im.g[i][j]*.534 + im.b[i][j]*.131;
+		}
+	}
+	return newImage;
+}
