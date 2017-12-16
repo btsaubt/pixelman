@@ -104,6 +104,8 @@ let check (globals, functions) =
         | SChar_Literal(_) -> Char
         | SString_Literal(_) -> String
         | SBool_Literal(_) -> Bool
+        | SVector_Literal(_, t) -> t
+        | SMatrix_Literal(_, t) -> t
         | SId(_,t) -> t
         | SBinop(_,_,_,t) -> t
         | SUnop(_,_,t) -> t
@@ -180,7 +182,7 @@ let check (globals, functions) =
       | Float_Literal(f) -> SFloat_Literal(f)
       | Bool_Literal(b) -> SBool_Literal(b)
       | Char_Literal(c) -> SChar_Literal(c)
-      | Vector_Literal(el) -> SVector_Literal(List.map check_vec_el el, get_vec_type el)
+      | Vector_Literal(el) -> check_vector_types el
       | Matrix_Literal(ell) -> check_matrix_types ell
       | Id s -> SId(s, type_of_identifier s)
       | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, e, access_type (type_of_identifier v))
@@ -201,31 +203,47 @@ let check (globals, functions) =
                 string_of_expr e))) fd.formals actuals
             ,fd.typ)
 
-    and check_vec_el e = match e with
-        Int_Literal(i) -> SInt_Literal(i)
-        | Float_Literal(i) -> SFloat_Literal(i)
+    (* only gets type of vector; does not go through whole vector all the time *)
+    and get_vec_type el = match el with
+        Int_Literal(_) :: ss -> get_vec_type ss
+        | Float_Literal(_) :: _ -> Float
+        | [] -> Int
         | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals"))
 
-    and get_vec_type = function
-        Int_Literal(_) :: ss -> get_vec_type ss
-        | Float_Literal(_) -> Float
-        | [] -> Int
+    and check_vector_types el =
+      let t = get_vec_type el in
+      let check_vec_el e = match e with (* this time check the whole vector and convert *)
+        Int_Literal(i) -> if t == Int then SInt_Literal(i) else SFloat_Literal(float i)
+        | Float_Literal(i) -> SFloat_Literal(i)
+        | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals"))
+      in
+      SVector_Literal(List.map check_vec_el el, Vector(t, Int_Literal(List.length el)))
 
-    and check_matrix_types ell = SMatrix_Literal(expr_list_to_sexpr_list ell, get_mat_type ell)
-
-    and expr_list_to_sexpr_list ell = 
-      let check_list_lengths =
+    and check_matrix_types ell =
+      let check_row_lengths ell = (* check row lengths *)
         let length_first_list = List.length (List.hd ell) in
-        List.iter (fun l -> if (List.compare_length_with l length_first_list) then 
+        List.iter (fun l -> if ((List.length l) != length_first_list) then 
                                raise (Failure ("matrix row lengths must be equal")) else ()) ell
       in
-      check_list_lengths; List.map get_mat_sexpr ell
-
-    and get_mat_sexpr ell = 
-      List.map (fun el -> List.map check_vec_el el) ell
-
-    and get_mat_type ell = 
-      let mtype = 
+      let get_mat_type ell = 
+        let rec check_row_types el = match el with
+          Int_Literal(_) :: ss -> check_row_types ss
+          | Float_Literal(_) :: _ -> Float_Literal(0.0)
+          | [] -> Int_Literal(0)
+          | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals"))
+        in
+        get_vec_type (List.map check_row_types ell)
+      in
+      let t = get_mat_type ell in
+      let mat_row_to_smat_row el =
+        let mat_el_to_smat_el e = match e with
+          Int_Literal(i) -> if t == Int then SInt_Literal(i) else SFloat_Literal(float i)
+          | Float_Literal(f) -> SFloat_Literal(f)
+          | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals"))
+        in
+        List.map mat_el_to_smat_el el
+      in
+      check_row_lengths ell; SMatrix_Literal(List.map mat_row_to_smat_row ell, Matrix(t, Int_Literal(List.length ell), Int_Literal(List.length (List.hd ell))))
 
 
     (* and check_matrix_types e = match e with
