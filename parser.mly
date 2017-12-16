@@ -168,7 +168,8 @@ primitive_literals:
 literals: 
   primitive_literals { $1 } 
   | LBRACKET array_literal RBRACKET { Vector_Literal(List.rev $2) } 
-  | LBRACKET OR multiple_vectors OR RBRACKET { Matrix_Literal(List.rev $3) }
+  | LBRACKET LBRACKET OR multiple_vectors OR RBRACKET RBRACKET {
+    Matrix_Literal(List.rev $4) }
 
 multiple_vectors: 
   | array_literal { [$1] } 
