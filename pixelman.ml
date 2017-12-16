@@ -1,10 +1,11 @@
    (*check the resulting AST, generate LLVM IR, and dump the module *)
 
-type action = Ast | LLVM_IR | Compile
+type action = Ast | Sast | LLVM_IR | Compile
 
 let _ =
   let action = if Array.length Sys.argv > 1 then
     List.assoc Sys.argv.(1) [ ("-a", Ast);	(* Print the AST only *)
+                              ("-s", Sast); 
 			      ("-l", LLVM_IR);  (* Generate LLVM, don't check *)
 			      ("-c", Compile) ] (* Generate, check LLVM IR *)
   else Compile in
@@ -21,9 +22,12 @@ let file_to_string file =
 
   in 
   let in_file = open_in "stdlib.px" in 
+  let string_in = file_to_string in_file in
+  let other_file = file_to_string stdin in
+  let str = String.concat "\n" [other_file; string_in] in
 
 
-  let lexbuf = Lexing.from_channel stdin in
+  let lexbuf = Lexing.from_string str in
   let ast = Parser.program Scanner.token lexbuf in
   let sast = Semant.check ast in
   match action with
