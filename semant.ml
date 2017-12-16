@@ -171,15 +171,6 @@ let check (globals, functions) =
         | (Float, Float) -> SBinop(se1, op, se2, Bool)
         | (Char, Char) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only compare ints/floats/chars with themselves for equality"))
-
-    (* and check_vector_types el =
-      let vec_typ = 
-        let first_el = hd el in
-        let check_first_el fe = match fe with
-          Float | Int -> first_el
-
-    and check_matrix_types = *)
-
     in
 
     (* Return an sexpr given an expr *)
@@ -189,8 +180,8 @@ let check (globals, functions) =
       | Float_Literal(f) -> SFloat_Literal(f)
       | Bool_Literal(b) -> SBool_Literal(b)
       | Char_Literal(c) -> SChar_Literal(c)
-      (* | Vector_Literal(el) -> SVector_Literal(check_vector_types el)
-      | Matrix_Literal(el) -> SMatrix_Literal(check_matrix_types el) *)
+      | Vector_Literal(el) -> SVector_Literal(List.map check_vec_el el, get_vec_type el)
+      | Matrix_Literal(ell) -> check_matrix_types ell
       | Id s -> SId(s, type_of_identifier s)
       | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, e, access_type (type_of_identifier v))
       | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, e1, e2, access_type (type_of_identifier v))
@@ -209,6 +200,39 @@ let check (globals, functions) =
                 string_of_typ ft ^ " expected " ^ string_of_typ et ^ " in " ^
                 string_of_expr e))) fd.formals actuals
             ,fd.typ)
+
+    and check_vec_el e = match e with
+        Int_Literal(i) -> SInt_Literal(i)
+        | Float_Literal(i) -> SFloat_Literal(i)
+        | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals"))
+
+    and get_vec_type = function
+        Int_Literal(_) :: ss -> get_vec_type ss
+        | Float_Literal(_) -> Float
+        | [] -> Int
+
+    and check_matrix_types ell = SMatrix_Literal(expr_list_to_sexpr_list ell, get_mat_type ell)
+
+    and expr_list_to_sexpr_list ell = 
+      let check_list_lengths =
+        let length_first_list = List.length (List.hd ell) in
+        List.iter (fun l -> if (List.compare_length_with l length_first_list) then 
+                               raise (Failure ("matrix row lengths must be equal")) else ()) ell
+      in
+      check_list_lengths; List.map get_mat_sexpr ell
+
+    and get_mat_sexpr ell = 
+      List.map (fun el -> List.map check_vec_el el) ell
+
+    and get_mat_type ell = 
+      let mtype = 
+
+
+    (* and check_matrix_types e = match e with
+        Int_Literal(i) -> SInt_Literal(i)
+        | Float_Literal(i) -> SFloat_Literal(i)
+        | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals")) *)
+        
 
     and get_binop_sexpr e1 e2 op =
       let se1 = expr_to_sexpr e1 in
