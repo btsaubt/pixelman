@@ -21,26 +21,32 @@ module StringMap = Map.Make(String)
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "Pixelman"
-  and i32_t  = L.i32_type   context
-  and i8_t   = L.i8_type    context
-  and i1_t   = L.i1_type    context
-  and f_t    = L.double_type context
-  and void_t = L.void_type  context in
+  and i32_t   = L.i32_type   context
+  and i8_t    = L.i8_type    context
+  and i1_t    = L.i1_type    context
+  and f_t     = L.double_type context
+  and array_t = L.array_type
+  and void_t  = L.void_type  context in
 
+  let int_lit_to_int = function
+    A.Int_Literal(i) -> i | _ -> raise(Failure("Can only make vector/matrix of dimension int literal"))
+  in
   let ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> f_t
     | A.Bool -> i1_t
     | A.Char -> i8_t
     | A.String -> i32_t
-    | A.Void -> void_t
-    | A.Vector(t, e) -> ltype
-    | A.Matrix(t, e, e) -> 
-    (*| A.Vector(typ, size) -> (match typ with 
-                             A.Int -> array_t i32_t size
-                            | A.Float -> array_t float_t size 
-                            | _ -> raise(Failure("Cannot make type")))
-  *)in
+    | A.Void -> void_t 
+    | A.Vector(typ, size) -> (match typ with 
+                             A.Int -> array_t i32_t (int_lit_to_int size)
+                            | A.Float -> array_t f_t (int_lit_to_int size)
+                            | _ -> raise(Failure("Cannot only make vector of type int/float")))
+    | A.Matrix(t, s1, s2) -> (match t with 
+                             A.Int -> array_t i32_t ((int_lit_to_int s1) * (int_lit_to_int s2))
+                            | A.Float -> array_t f_t ((int_lit_to_int s1) * (int_lit_to_int s2))
+                            | _ -> raise(Failure("Cannot only make vector of type int/float")))
+  in
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =

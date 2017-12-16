@@ -5,7 +5,7 @@
 let character = [' '-'!' '#'-'[' ']'-'~'] | ('\\' ['\\' ''' '"' 'n' 'r' 't'])
 let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\n' '\r'] 
-let float_lit = ('-'?) (digit*) ['.'] digit+
+let float_lit = ('-'?) (digit*) ['.']? digit+
 let int_lit = ('-'?) digit+
 
 rule token = parse
