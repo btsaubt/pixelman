@@ -251,6 +251,14 @@ let check (globals, functions) =
         | Float_Literal(i) -> SFloat_Literal(i)
         | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals")) *)
         
+    and compare_vector_matrix_type v1 v2 = 
+      match v1 with
+        Vector(ty1, Int_Literal(i1)) -> match v2 with
+          Vector(ty2, Int_Literal(i2)) -> ty1 == ty2 && i1 == i2
+          | _ -> raise (Failure ("cannot compare vectors and matrices"))
+        | Matrix(ty1, Int_Literal(i11), Int_Literal(i22)) -> match v2 with
+          Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> ty1 == ty2 && i11 == i21 && i22 == i22
+          | _ -> raise (Failure ("cannot compare vectors and matrices"))
 
     and get_binop_sexpr e1 e2 op =
       let se1 = expr_to_sexpr e1 in
@@ -272,8 +280,13 @@ let check (globals, functions) =
       let lt = type_of_identifier var in
       let se = expr_to_sexpr e in
       let rt = get_sexpr_type se in
+      match lt with 
+      Vector(t,e) -> if compare_vector_matrix_type lt rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment "))
+        | _ -> 
       if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
          string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))
+
+
 
     and check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
       then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
