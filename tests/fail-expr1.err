@@ -1,1 +1,1 @@
-Fatal error: exception Failure("illegal binary operator bool + int in d + a")
+Fatal error: exception Failure("can only perform binary arithmetic operators with Int/Float variables or matrices")
