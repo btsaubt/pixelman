@@ -1,0 +1,8 @@
+def int main(){
+	int[5] v1;
+	int i;
+	v1 = [1.0,2.0,3.0,4.0,5.0]; :)these are floats
+	for(i = 0;i<5;i=i+1){
+		print(v1[i]);
+	}
+}
