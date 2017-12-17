@@ -10,8 +10,6 @@ let int_lit = digit+
 
 rule token = parse
   whitespace { token lexbuf }             (* Whitespace *)
-  (*| "(:"     { comment lexbuf }           (* Comments *)
-  *)
   | ":)"     { comment lexbuf } 
     (* Separators *)
 | '('      { LPAREN }
@@ -22,21 +20,13 @@ rule token = parse
 | ','      { COMMA }
 | "["      { LBRACKET } 
 | "]"      { RBRACKET } 
+| "[|"     { LMATBRACK } 
+| "|]"     { RMATBRACK } 
 (*| ':'      { COLON }
 | "."      { DOT } *)
 
 	(* Assignment Operators *)
 | '='      { ASSIGN }
-(*| "*="     { MULTASSIGN } 
-| "/="     { DIVASSIGN }
-| "%="     { MODASSIGN } 
-| "+="     { PLUSASSIGN } 
-| "-="     { SUBASSIGN } 
-| ">>="    { RASSIGN } 
-| "<<="    { LASSIGN } 
-| "&="     { ANDASSIGN } 
-| "!="     { NOTASSIGN } 
-*)
 
     (* Binary Arithmetic Operators *)
 | '+'      { PLUS }

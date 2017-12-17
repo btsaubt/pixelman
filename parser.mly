@@ -8,7 +8,6 @@ open Ast
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR IMAGE
-%token NOVECLBRACKET
 %token BREAK CONTINUE
 %token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
 %token <int> INT_LITERAL
@@ -22,6 +21,7 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELSE
 %nonassoc NOVECLBRACKET
+%nonassoc LMATBRACK
 %nonassoc LBRACKET
 %right ASSIGN
 %left OR
@@ -101,6 +101,7 @@ mat_t:
 im_t:
    IMAGE LBRACKET expr COMMA expr RBRACKET { Image($3, $5) }
 
+
 stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { $2 :: $1 }
@@ -149,15 +150,6 @@ expr:
   | LPAREN INT RPAREN expr         { Unop(IntCast, $4) }
   | LPAREN FLOAT RPAREN expr         { Unop(FloatCast, $4) }
   | ID ASSIGN expr   { Assign($1, $3) }
-  /*| ID MULTASSIGN expr { Assign($1, $3) } 
-  | ID DIVASSIGN  expr { Assign($1, $3) } 
-  | ID PLUSASSIGN expr { Assign($1, $3) } 
-  | ID SUBASSIGN expr { Assign($1, $3) }
-  | ID RASSIGN expr { Assign($1, $3) }
-  | ID LASSIGN expr { Assign($1, $3) }
-  | ID ANDASSIGN expr { Assign($1, $3) }
-  | ID NOTASSIGN expr { Assign($1, $3) }
-*/
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
@@ -175,15 +167,15 @@ primitive_literals:
 literals: 
   primitive_literals { $1 } 
   | LBRACKET array_literal RBRACKET { Vector_Literal(List.rev $2) } 
-  | LBRACKET OR multiple_vectors OR RBRACKET { Matrix_Literal(List.rev $3) }
+  | LMATBRACK matrix_literal RMATBRACK { Matrix_Literal(List.rev $2) }
 
-multiple_vectors: 
-  | array_literal { [$1] } 
-  | multiple_vectors OR array_literal { $3 :: $1 } 
+matrix_literal: 
+  LBRACKET array_literal RBRACKET { [$2] } 
+  | matrix_literal BITAND LBRACKET array_literal RBRACKET { $4 :: $1 } 
 
 array_literal: 
-  literals { [$1] } 
-  | array_literal COMMA literals { $3 :: $1 } 
+  primitive_literals { [$1] } 
+  | array_literal COMMA primitive_literals { $3 :: $1 } 
 
 actuals_opt:
     /* nothing */ { [] }

@@ -35,8 +35,8 @@ let check (globals, functions) =
 
   (**** Checking Functions ****)
 
-  let protected_functions = ["print"; "print_string"; "perror"; "scan"; "size"; "load"; "write";
-                                 "display"; "resize"; "transform"; "print_float"; "printb"] in
+  let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
+                                 "display"; "resize"; "transform"; "print_float"; "print_string"] in
   let rec check_protected = function
     [] -> ()
     | h :: t -> if List.mem h (List.map (fun fd -> fd.fname) functions)
