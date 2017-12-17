@@ -13,8 +13,6 @@ type expr =
   | String_Literal of string 
   | Vector_Literal of expr list 
   | Matrix_Literal of expr list list 
-  (* | Pixel of expr * expr * expr * expr * expr
-  | Image of expr * expr *) 
   | Bool_Literal of bool
   | Id of string
   | Binop of expr * op * expr
@@ -25,7 +23,7 @@ type expr =
   | MatAccess of string * expr * expr
   | Noexpr
 
-type typ = Int | Bool | Float | Char | String | Void | (*Image | Pixel |*) Vector of typ * expr | Matrix of typ * expr * expr
+type typ = Int | Bool | Float | Char | String | Void | Image of expr * expr | Vector of typ * expr | Matrix of typ * expr * expr
 
 type bind = typ * string
 
@@ -92,11 +90,6 @@ and(* rec *) string_of_expr = function
   | Bool_Literal(b) -> if b then "true" else "false"
   | Vector_Literal(el) -> string_of_vector el   
   | Matrix_Literal(el) -> string_of_matrix el
-  (* | Pixel(r, g, b, x, y) -> "Pixel(" ^ string_of_expr r ^ ", " ^ string_of_expr g ^ ", " ^ 
-                            string_of_expr b ^ ", " ^ string_of_expr x ^ ", " ^ 
-                            string_of_expr y 
-  | Image(h, w) -> string_of_expr h ^ ", " ^ string_of_expr w
-  *)  
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -132,8 +125,7 @@ let rec string_of_typ = function
   | Float -> "float"
   | String -> "string"
   | Void -> "void"
-  (*| Pixel -> "Pixel" 
-  | Image -> "Image" *)
+  | Image(h, w) -> "Image[" ^ string_of_expr h ^ "," ^ string_of_expr w ^ "]"
   | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
   | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
 

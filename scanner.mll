@@ -89,11 +89,7 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
-(*| "matrix" { MATRIX } 
-| "vector" { VECTOR } 
-
-| "Pixel"  { PIXEL } 
-| "Image"  { IMAGE } *)
+| "Image"  { IMAGE }
 
 (* Literals *)
 | int_lit   as lxm    { INT_LITERAL(int_of_string lxm) }
