@@ -1,0 +1,4 @@
+def int main(){
+	float[4][5] v1;
+	return 0;
+}

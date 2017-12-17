@@ -1,4 +1,4 @@
-def string printb(bool b){
+def void printb(bool b){
     if(b){
         print_string("True");
     }
