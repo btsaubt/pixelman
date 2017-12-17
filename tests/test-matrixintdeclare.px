@@ -1,0 +1,3 @@
+def int main(){
+	int[5][5] m1;
+}
