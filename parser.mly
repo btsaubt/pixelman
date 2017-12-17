@@ -7,9 +7,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON 
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL
-IMAGE
- 
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL IMAGE
 %token NOVECLBRACKET
 %token BREAK CONTINUE
 %token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
@@ -35,7 +33,8 @@ IMAGE
 %left LT GT LEQ GEQ
 %left LSHIFT RSHIFT 
 %left PLUS MINUS
-%left TIMES DIVIDE MOD DIVINT 
+%left TIMES DIVIDE MOD DIVINT
+/* %right INT FLOAT */
 %right NOT NEG
 
 %start program
@@ -141,6 +140,8 @@ expr:
   | expr BITXOR     expr { Binop($1, Bitxor, $3) } 
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
+  | LPAREN INT RPAREN expr         { Unop(IntCast, $4) }
+  | LPAREN FLOAT RPAREN expr         { Unop(FloatCast, $4) }
   | ID ASSIGN expr   { Assign($1, $3) }
   /*| ID MULTASSIGN expr { Assign($1, $3) } 
   | ID DIVASSIGN  expr { Assign($1, $3) } 

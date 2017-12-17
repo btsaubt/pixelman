@@ -4,7 +4,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
           And | Or | Divint | Shiftleft | Shiftright | Bitand | Bitor | Bitxor |
           Mod
 
-type uop = Neg | Not
+type uop = Neg | Not | IntCast | FloatCast
 
 type expr =
     Int_Literal of int
@@ -75,6 +75,8 @@ let string_of_op = function
 let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
+  | IntCast -> "(Int) "
+  | FloatCast -> "(Float) "
 
 let rec string_of_vector el = 
   "[" ^ String.concat ", " (List.map (fun e -> string_of_expr e) el) ^ "]"
