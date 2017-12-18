@@ -17,17 +17,18 @@ module StringMap = Map.Make(String)
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "Pixelman"
-  and i32_t   = L.i32_type   context
-  and i8_t    = L.i8_type    context
-  and i1_t    = L.i1_type    context
-  and f_t     = L.double_type context
-  and array_t = L.array_type
-  and void_t  = L.void_type  context in
+  and i32_t    = L.i32_type   context
+  and i8_t     = L.i8_type    context
+  and i1_t     = L.i1_type    context
+  and f_t      = L.double_type context
+  and array_t  = L.array_type
+  and ptr_t    = L.pointer_type
+  and void_t   = L.void_type  context in
 
   let int_lit_to_int = function
     A.Int_Literal(i) -> i | _ -> raise(Failure("Can only make vector/matrix of dimension int literal"))
   in
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> f_t
     | A.Bool -> i1_t
@@ -37,12 +38,22 @@ let translate (globals, functions) =
     | A.Vector(typ, size) -> (match typ with 
                              A.Int -> array_t i32_t (int_lit_to_int size)
                             | A.Float -> array_t f_t (int_lit_to_int size)
-                            | _ -> raise(Failure("Cannot only make vector of type int/float")))
+                            | _ -> raise(Failure("Can only make vector of type int/float")))
+    | A.VectorPtr(t) -> (match t with
+                          A.Int   -> ptr_t i32_t
+                          | A.Float -> ptr_t f_t
+                          | _ -> raise(Failure("Can only make vector of type int/float")))
     | A.Matrix(t, s1, s2) -> (match t with 
-                             A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
+                          A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | A.Float -> array_t (array_t f_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
-    (* | A.Image(h,w) -> IMPLEMENT IMAGE HERE *)
+    | A.MatrixPtr(t) -> (match t with
+                          A.Int   -> ptr_t i32_t
+                          | A.Float -> ptr_t f_t
+                          | _ -> raise(Failure("Can only make vector of type int/float")))
+    | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w)) in
+          array_t mat_t 3 (* make an array of 3 h x w matrices *)
+    | A.ImagePtr -> ptr_t i32_t
   in
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -289,6 +300,10 @@ let translate (globals, functions) =
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.S.styp with
         A.Void -> L.build_ret_void
+      (* | A.VectorPtr -> (match t with
+        )
+      | A.MatrixPtr -> 
+      | A.ImagePtr -> *)
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
   in
 
