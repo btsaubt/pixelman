@@ -311,7 +311,7 @@ let check (globals, functions) =
         | And | Or  -> get_binop_boolean_sexpr se1 se2 op
         | Less | Leq | Greater | Geq -> get_binop_comparison_sexpr se1 se2 op
         | Shiftleft | Shiftright | Bitand | Bitor | Bitxor -> get_binop_bitwise_sexpr se1 se2 op
-        | Add | Sub | Mult | Div | Divint | Mod -> get_binop_arithmetic_sexpr se1 se2 op
+        | Add | Sub | Mult | Div | Mod -> get_binop_arithmetic_sexpr se1 se2 op
 
     and get_unop_sexpr op e =
       let se = expr_to_sexpr e in
@@ -376,12 +376,12 @@ let check (globals, functions) =
     let check_var_decl (t, id) = match t with
       Int | Bool | Float | Char | String -> (t, id)
       | Void -> raise (Failure ("cannot declare a void type variable"))
-      | Vector(t, e) -> check_int_literal_expr e;
-        if (t != Float) && (t != Int)
+      | Vector(t1, e) -> check_int_literal_expr e;
+        if (t1 != Float) && (t1 != Int)
         then raise(Failure("can only have vectors/matrices of ints/floats"))
         else (); (t, id)
-      | Matrix(t, e1, e2) -> check_int_literal_expr e1; check_int_literal_expr e2;
-        if (t != Float) && (t != Int)
+      | Matrix(t1, e1, e2) -> check_int_literal_expr e1; check_int_literal_expr e2;
+        if (t1 != Float) && (t1 != Int)
         then raise(Failure("can only have vectors/matrices of ints/floats"))
         else (); (t, id)
       | Image(h,w) -> check_int_literal_expr h; check_int_literal_expr w; (t, id)

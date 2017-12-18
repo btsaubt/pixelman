@@ -41,7 +41,7 @@ open Ast
 %left LSHIFT RSHIFT
 %right INTCAST FLOATCAST
 %left PLUS MINUS
-%left TIMES DIVIDE MOD DIVINT
+%left TIMES DIVIDE MOD
 %right NOT NEG
 
 %start program

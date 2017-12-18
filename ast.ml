@@ -6,8 +6,7 @@
 *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or | Divint | Shiftleft | Shiftright | Bitand | Bitor | Bitxor |
-          Mod
+          And | Or | Shiftleft | Shiftright | Bitand | Bitor | Bitxor | Mod
 
 type uop = Neg | Not | IntCast | FloatCast
 
@@ -79,7 +78,6 @@ let string_of_op = function
   | Geq -> ">="
   | And -> "&&"
   | Or -> "||"
-  | Divint -> "//"
   | Mod -> "%"
   | Shiftleft -> "<<"
   | Shiftright -> ">>"
