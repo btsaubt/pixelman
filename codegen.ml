@@ -114,10 +114,10 @@ let translate (globals, functions) =
                    with Not_found -> StringMap.find n global_vars
     in
 
-    let rec get_vector_acc_addr s e1 = L.build_gep (lookup s) 
+    let rec get_vector_acc_addr s e1 builder = L.build_gep (lookup s) 
         [| (L.const_int i32_t 0); (expr builder e1) |] s builder
 
-    and get_matrix_acc_addr s e1 e2 = L.build_gep (lookup s) 
+    and get_matrix_acc_addr s e1 e2 builder = L.build_gep (lookup s) 
         [| L.const_int i32_t 0; expr builder e1; expr builder e2 |] s builder
 
     (* Construct code for an expression; return its value *)
@@ -148,8 +148,8 @@ let translate (globals, functions) =
 
       | S.SNoexpr -> L.const_int i32_t 0
       | S.SId (s, _) -> L.build_load (lookup s) s builder
-      | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e) s builder
-      | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2) s builder
+      | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e builder) s builder
+      | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2 builder) s builder
       | S.SBinop (e1, op, e2, _) -> (* too late to implement using sexpr types to make things easier *)
 	  let e1' = expr builder e1
 	  and e2' = expr builder e2 in
@@ -222,8 +222,8 @@ let translate (globals, functions) =
           | A.FloatCast -> L.build_sitofp e' f_t   "int_to_float" builder )
       | S.SAssign (v, e, _) -> let lsb = (match v with
                                  S.SId(n,_) -> lookup n
-                                 | S.SVecAccess(s,e,_) -> get_vector_acc_addr s e
-                                 | S.SMatAccess(s,e1,e2,_) -> get_matrix_acc_addr s e1 e2
+                                 | S.SVecAccess(s,e,_) -> get_vector_acc_addr s e builder
+                                 | S.SMatAccess(s,e1,e2,_) -> get_matrix_acc_addr s e1 e2 builder
                                  | _ -> raise(Failure("Illegal assignment lvalue")))
                                in
                                let rsb = expr builder e in
