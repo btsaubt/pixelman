@@ -142,6 +142,24 @@ let check (globals, functions) =
         | (Int, Float) -> SBinop(SUnop(FloatCast, se1, Float), op, se2, Float)
         | (Float, Int) -> SBinop(se1, op, SUnop(FloatCast, se2, Float), Float)
         | (Float, Float) -> SBinop(se1, op, se2, Float)
+        (* | (Matrix(tm1, Int_Literal(i), Int_Literal(j)), tm2) -> (match op with
+          Mult -> (match tm2 with (* matrix x t check *)
+                      Float -> SCall("scalar_mult_matf", [se2, se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                      | Int -> if tm1 == Float 
+                        then SCall("scalar_mult_matf", [se2, se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                        else SCall("scalar_mult_mati", [se2, se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                      | Vector(tv2, Int_Literal(i2)) (* a vector is treated as a n x 1 matrix *) -> if i != i2 
+                        then raise(Failure("cannot multiply matrix of dimension " ^ 
+                          string_of_int i ^ "x" ^ string_of_int j ^ 
+                          " by a vector of dimension " ^ string_of_int i2))
+                        else SCall("vec_mat_mult", [se1, se2], Matrix())
+                      | Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if i != i2 
+                        then raise(Failure("cannot multiply matrix of dimension " ^ 
+                          string_of_int i ^ "x" ^ string_of_int j ^ 
+                          " by a vector of dimension " ^ string_of_int i2))
+                      | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
+                  )
+        ) *)
         | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
 
     and get_unop_arithmetic_sexpr se op = 
@@ -177,7 +195,7 @@ let check (globals, functions) =
         match t with
           Int  -> SUnop(op, se, op_t)
           | Float -> SUnop(op, se, op_t)
-          | _ -> raise (Failure ("can only cast int/float languages "))
+          | _ -> raise (Failure ("can only cast int/float expressions to int/float expressions"))
 
     and get_equality_type se1 se2 op = 
       let t1 = get_sexpr_type se1 in
@@ -205,6 +223,7 @@ let check (globals, functions) =
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
       | Assign(var, e) (* as ex *) -> get_assign_sexpr var e
+      (* | Call() *) (* let's put the std library functions in here *)
       | Call(fname, actuals) as call -> let fd = function_decl fname in
          if List.length actuals != List.length fd.formals then
            raise (Failure ("expecting " ^ string_of_int
@@ -212,10 +231,22 @@ let check (globals, functions) =
          else
            SCall(fname,List.map2 (fun (ft, _) e -> let se = expr_to_sexpr e in
             let et = get_sexpr_type se in
-              if et == ft then se else raise (Failure ("illegal actual argument found " ^
+              if check_formal_actual_call ft et then se else raise (Failure ("illegal actual argument found " ^
                 string_of_typ ft ^ " expected " ^ string_of_typ et ^ " in " ^
                 string_of_expr e))) fd.formals actuals
-            ,fd.typ)
+            , fd.typ)
+
+    and check_formal_actual_call ft et = match ft with
+      VectorPtr(t1) -> (match et with
+        Vector(t2,_) -> t1 == t2
+        | _ -> false)
+      | MatrixPtr(t1) -> (match et with
+        Matrix(t2,_,_) -> t1 == t2
+        | _ -> false)
+      | ImagePtr -> (match et with
+        Image(_,_) -> true
+        | _ -> false)
+      | _ -> ft == et
 
     (* only gets type of vector; does not go through whole vector all the time *)
     and get_vec_type el = match el with
@@ -270,7 +301,7 @@ let check (globals, functions) =
                           Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> 
                                   ty1 == ty2 && i11 == i21 && i12 == i22
                           | _ -> raise (Failure ("cannot compare vectors and matrices")) )
-        | _ -> raise (Failure (""))
+        | _ -> raise (Failure ("matrix and vector dimensions must be int literals"))
 
     and get_binop_sexpr e1 e2 op =
       let se1 = expr_to_sexpr e1 in
@@ -336,12 +367,25 @@ let check (globals, functions) =
       | Continue -> SContinue *)
     in
 
+    let check_int_literal_expr e = match e with
+      Int_Literal(_) -> ()
+      | -> raise(Failure("can only declare vectors/matrices/images with int literals"))
+    in
+
     (* check variable declaration type *)
     let check_var_decl (t, id) = match t with
       Int | Bool | Float | Char | String -> (t, id)
       | Void -> raise (Failure ("cannot declare a void type variable"))
-      | Vector(_, e) -> check_int_expr e; (t, id)
-      | Matrix(_, e1, e2) -> check_int_expr e1; check_int_expr e2; (t, id)
+      | Vector(t, e) -> check_int_literal_expr e;
+        if (t != Float) && (t != Int)
+        then raise(Failure("can only have vectors/matrices of ints/floats"))
+        else (); (t, id)
+      | Matrix(t, e1, e2) -> check_int_literal_expr e1; check_int_literal_expr e2;
+        if (t != Float) && (t != Int)
+        then raise(Failure("can only have vectors/matrices of ints/floats"))
+        else (); (t, id)
+      | Image(h,w) -> check_int_literal_expr h; check_int_literal_expr w; (t, id)
+      | _ -> raise(Failure("invalid variable declaration type"))
     in
 
     { 

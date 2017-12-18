@@ -28,7 +28,19 @@ type expr =
   | MatAccess of string * expr * expr
   | Noexpr
 
-type typ = Int | Bool | Float | Char | String | Void | Image of expr * expr | Vector of typ * expr | Matrix of typ * expr * expr
+type typ = 
+     Int 
+   | Bool 
+   | Float 
+   | Char 
+   | String 
+   | Void 
+   | Image of expr * expr 
+   | ImagePtr
+   | Vector of typ * expr 
+   | Matrix of typ * expr * expr
+   | MatrixPtr of typ
+   | VectorPtr of typ
 
 type bind = typ * string
 
@@ -131,8 +143,11 @@ let rec string_of_typ = function
   | String -> "string"
   | Void -> "void"
   | Image(h, w) -> "Image[" ^ string_of_expr h ^ "," ^ string_of_expr w ^ "]"
+  | ImagePtr -> "Image"
   | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
   | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
+  | MatrixPtr(t) -> string_of_typ t ^ "[][]"
+  | VectorPtr(t) -> string_of_typ t ^ "[]"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
