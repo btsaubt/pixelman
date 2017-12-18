@@ -6,9 +6,9 @@ open Ast
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON 
 %token LMATBRACK RMATBRACK
-%token PLUS MINUS TIMES DIVIDE ASSIGN NOT
+%token PLUS MINUS TIMES DIVIDE ASSIGN NOT INTCAST FLOATCAST
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR PIXEL IMAGE
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR IMAGE
 
 %token NOVECLBRACKET
 %token BREAK CONTINUE
@@ -18,8 +18,7 @@ open Ast
 %token <char> CHAR_LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> STRING_LITERAL
-/*%token <list> VECTOR_LITERAL
-*/%token EOF
+%token EOF
 
 %nonassoc NOELSE
 %nonassoc ELSE
@@ -34,9 +33,10 @@ open Ast
 %left BITAND 
 %left EQ NEQ
 %left LT GT LEQ GEQ
-%left LSHIFT RSHIFT 
+%left LSHIFT RSHIFT
+%right INTCAST FLOATCAST
 %left PLUS MINUS
-%left TIMES DIVIDE MOD DIVINT 
+%left TIMES DIVIDE MOD DIVINT
 %right NOT NEG
 
 %start program
@@ -74,7 +74,10 @@ typ:
   | FLOAT { Float } 
   | CHAR { Char } 
   | STRING { String } 
-  | VOID { Void }
+  | VOID { Void } 
+  | im_t { $1 }
+/*  | vec_t { $1 } 
+  | mat_t { $1 } */
 
 vdecl_list:
     /* nothing */    { [] }
@@ -84,12 +87,25 @@ vdecl:
    typ ID SEMI { ($1, $2) }
    | vec_t { $1 } 
    | mat_t { $1 } 
+ 
 
 vec_t: 
   typ LBRACKET expr RBRACKET ID SEMI { (Vector($1, $3), $5) }  
 
 mat_t: 
-  typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET ID SEMI { (Matrix($1, $3, $6), $8) } 
+  typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET ID SEMI { (Matrix($1, $3, $6), $8) }
+
+/*
+vec_t:
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
+   
+mat_t:
+   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
+*/
+
+im_t:
+   IMAGE LBRACKET expr COMMA expr RBRACKET { Image($3, $5) }
+
 
 stmt_list:
     /* nothing */  { [] }
@@ -136,6 +152,8 @@ expr:
   | expr BITXOR     expr { Binop($1, Bitxor, $3) } 
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
+  | INTCAST expr    { Unop(IntCast, $2) }
+  | FLOATCAST expr  { Unop(FloatCast, $2) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }

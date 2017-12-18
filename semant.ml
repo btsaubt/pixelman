@@ -120,17 +120,13 @@ let check (globals, functions) =
       let t1 = get_sexpr_type se1 in
       let t2 = get_sexpr_type se2 in
       match (t1, t2) with
-        (Int, Int) -> SBinop(se1, op, se2, Bool)
-        | (Int, Bool) -> SBinop(se1, op, se2, Bool)
-        | (Bool, Int) -> SBinop(se1, op, se2, Bool)
-        | (Bool, Bool) -> SBinop(se1, op, se2, Bool)
+        (Bool, Bool) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
 
     and get_unop_boolean_sexpr se op =
       let t = get_sexpr_type se in
       match t with
-        Int -> SUnop(op, se, Bool)
-        | Bool -> SUnop(op, se, Bool)
+        Bool -> SUnop(op, se, Bool)
         | _ -> raise (Failure ("can only perform boolean operators with Int/Bool types"))
 
     and get_binop_arithmetic_sexpr se1 se2 op = 
@@ -138,8 +134,8 @@ let check (globals, functions) =
       let t2 = get_sexpr_type se2 in
       match (t1, t2) with
         (Int, Int) -> SBinop(se1, op, se2, Int)
-        | (Int, Float) -> SBinop(se1, op, se2, Float)
-        | (Float, Int) -> SBinop(se1, op, se2, Float)
+        | (Int, Float) -> SBinop(SUnop(FloatCast, se1, Float), op, se2, Float)
+        | (Float, Int) -> SBinop(se1, op, SUnop(FloatCast, se2, Float), Float)
         | (Float, Float) -> SBinop(se1, op, se2, Float)
         | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
 
@@ -164,6 +160,18 @@ let check (globals, functions) =
         (Int, Int) -> SBinop(se1, op, se2, Bool)
         | (Float, Float) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only compare ints/floats with themselves for inequalities"))
+
+    and get_unop_cast_sexpr se op = 
+      let t = get_sexpr_type se in
+      let op_t = match op with
+        IntCast -> Int
+        | FloatCast -> Float
+        | _ -> raise (Failure ("this is impossible to reach :~)"))
+      in
+      match t with
+        Int  -> SUnop(op, se, op_t)
+        | Float -> SUnop(op, se, op_t)
+        | _ -> raise (Failure ("can only cast int/float languages "))
 
     and get_equality_type se1 se2 op = 
       let t1 = get_sexpr_type se1 in
@@ -244,12 +252,6 @@ let check (globals, functions) =
         List.map mat_el_to_smat_el el
       in
       check_row_lengths ell; SMatrix_Literal(List.map mat_row_to_smat_row ell, Matrix(t, Int_Literal(List.length ell), Int_Literal(List.length (List.hd ell))))
-
-
-    (* and check_matrix_types e = match e with
-        Int_Literal(i) -> SInt_Literal(i)
-        | Float_Literal(i) -> SFloat_Literal(i)
-        | _ -> raise (Failure ("vector/matrix literals can only contain float/int literals")) *)
         
     and compare_vector_matrix_type v1 v2 = 
       match v1 with
@@ -279,6 +281,7 @@ let check (globals, functions) =
       match op with
         Neg -> get_unop_arithmetic_sexpr se op
         | Not -> get_unop_boolean_sexpr se op
+        | IntCast | FloatCast -> get_unop_cast_sexpr se op
 
     and get_assign_sexpr var e =
       let lt = type_of_identifier var in
