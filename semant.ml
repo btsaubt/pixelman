@@ -229,24 +229,28 @@ let check (globals, functions) =
            raise (Failure ("expecting " ^ string_of_int
              (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
          else
-           SCall(fname,List.map2 (fun (ft, _) e -> let se = expr_to_sexpr e in
-            let et = get_sexpr_type se in
-              if check_formal_actual_call ft et then se else raise (Failure ("illegal actual argument found " ^
-                string_of_typ ft ^ " expected " ^ string_of_typ et ^ " in " ^
-                string_of_expr e))) fd.formals actuals
-            , fd.typ)
+            SCall(fname,List.map2 (fun (ft, _) e -> let se = 
+              let e' = expr_to_sexpr e 
+              in if ft == Float && get_sexpr_type e' == Int then SUnop(FloatCast, e', Float) else e'
+            in
+              let et = get_sexpr_type se in
+                if check_formal_actual_call ft et then se else raise (Failure ("illegal actual argument found " ^
+                  string_of_typ ft ^ " expected " ^ string_of_typ et ^ " in " ^
+                  string_of_expr e))) fd.formals actuals
+              , fd.typ)
 
     and check_formal_actual_call ft et = match ft with
-      VectorPtr(t1) -> (match et with
-        Vector(t2,_) -> t1 == t2
-        | _ -> false)
-      | MatrixPtr(t1) -> (match et with
+      VectorPtr(t1)    -> (match et with
+        Vector(t2,_)   -> t1 == t2
+        | _            -> false)
+      | MatrixPtr(t1)  -> (match et with
         Matrix(t2,_,_) -> t1 == t2
-        | _ -> false)
-      | ImagePtr -> (match et with
-        Image(_,_) -> true
-        | _ -> false)
-      | _ -> ft == et
+        | _            -> false)
+      | ImagePtr       -> (match et with
+        Image(_,_)     -> true
+        | _            -> false)
+      | Float          -> et == Int
+      | _              -> ft == et
 
     (* only gets type of vector; does not go through whole vector all the time *)
     and get_vec_type el = match el with
@@ -331,10 +335,12 @@ let check (globals, functions) =
       match lt with 
       Vector(_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
         | Matrix(_,_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
-        | _ -> if lt == rt then SAssign(se1,se2,lt) 
-               else raise (Failure ("illegal assignment " ^
-               string_of_typ lt ^ " = " ^ string_of_typ rt ^ 
-               " in: " ^ string_of_expr e1 ^ " = " ^ string_of_expr e2))
+        | _ -> if lt == Float && rt == Int 
+               then SAssign(se1, SUnop(FloatCast, se2, Float), Float)
+               else (if lt == rt then SAssign(se1,se2,lt) 
+                       else raise (Failure ("illegal assignment " ^
+                       string_of_typ lt ^ " = " ^ string_of_typ rt ^ 
+                       " in: " ^ string_of_expr e1 ^ " = " ^ string_of_expr e2)))
 
     and check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
       then raise (Failure ("expected boolean expression in " ^ string_of_expr e))

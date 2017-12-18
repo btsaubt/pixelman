@@ -95,7 +95,7 @@ let rec string_of_vector el =
   "[" ^ String.concat ", " (List.map (fun e -> string_of_expr e) el) ^ "]"
 
 and(* rec *) string_of_matrix el = "[|" ^
-   String.concat " | " (List.map (fun v -> string_of_vector v) el) ^ "|]"
+   String.concat " & " (List.map (fun v -> string_of_vector v) el) ^ "|]"
 
 and(* rec *) string_of_expr = function
     Int_Literal(i) -> string_of_int i
