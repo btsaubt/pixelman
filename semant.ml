@@ -35,7 +35,7 @@ let check (globals, functions) =
 
   (**** Checking Functions ****)
 
-  let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
+  let protected_functions = ["print_int"; "perror"; "scan"; "size"; "load"; "write";
                                  "display"; "resize"; "transform"; "print_float"; "print_string"] in
   let rec check_protected = function
     [] -> ()
@@ -48,8 +48,8 @@ let check (globals, functions) =
     (List.map (fun fd -> fd.fname) functions);
 
   (* Function declaration for a named function *)
-  let built_in_decls =  StringMap.add "print"
-     { typ = Void; fname = "print"; formals = [(Int, "x")];
+  let built_in_decls =  StringMap.add "print_int"
+     { typ = Void; fname = "print_int"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "printb"
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
        locals = []; body = [] } (StringMap.add "printbig"
@@ -253,12 +253,16 @@ let check (globals, functions) =
         
     and compare_vector_matrix_type v1 v2 = 
       match v1 with
-        Vector(ty1, Int_Literal(i1)) -> match v2 with
-          Vector(ty2, Int_Literal(i2)) -> ty1 == ty2 && i1 == i2
-          | _ -> raise (Failure ("cannot compare vectors and matrices"))
-        | Matrix(ty1, Int_Literal(i11), Int_Literal(i22)) -> match v2 with
-          Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> ty1 == ty2 && i11 == i21 && i22 == i22
-          | _ -> raise (Failure ("cannot compare vectors and matrices"))
+        | Vector(ty1, Int_Literal(i1)) -> 
+                ( match v2 with
+                  Vector(ty2, Int_Literal(i2)) -> ty1 == ty2 && i1 == i2
+                  | _ -> raise (Failure ("cannot compare vectors and matrices")) )
+        | Matrix(ty1, Int_Literal(i11), Int_Literal(i22)) -> 
+                        ( match v2 with
+                          Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> 
+                                  ty1 == ty2 && i11 == i21 && i22 == i22
+                          | _ -> raise (Failure ("cannot compare vectors and matrices")) )
+        | _ -> raise (Failure ("failfailfafilafilaflia"))
 
     and get_binop_sexpr e1 e2 op =
       let se1 = expr_to_sexpr e1 in
@@ -282,6 +286,7 @@ let check (globals, functions) =
       let rt = get_sexpr_type se in
       match lt with 
       Vector(t,e) -> if compare_vector_matrix_type lt rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment "))
+        | Matrix(t,e,_) -> if compare_vector_matrix_type lt rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment "))
         | _ -> 
       if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
          string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))

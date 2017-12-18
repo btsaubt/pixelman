@@ -185,7 +185,7 @@ let translate (globals, functions) =
           | A.Not     -> L.build_not) e' "tmp" builder
       | S.SAssign (s, e, _) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
-      | S.SCall ("print", [e], _) ->
+      | S.SCall ("print_int", [e], _) ->
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
       | S.SCall ("print_string", [e], _) ->
