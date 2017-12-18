@@ -1,4 +1,9 @@
-(* Semantic checking for the MicroC compiler *)
+(* Semantic checking for the pixelman compiler 
+ * Teresa Choe
+ * Brian Tsau
+ * Anthony Chan
+ * Gabriel Kramer-Garcia
+*)
 
 open Ast
 open Sast

@@ -1,4 +1,9 @@
-(* Semantically Checked Abstract Syntax Tree and functions for printing it *)
+(* pixelman's Semantically Checked Abstract Syntax Tree and functions for printing it 
+ * Gabriel Kramer-Garcia
+ * Anthony Chan
+ * Teresa Choe
+ * Brian Tsau
+*)
 
 open Ast
 

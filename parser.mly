@@ -1,4 +1,9 @@
-/* Ocamlyacc parser for Pixelman */
+/* Ocamlyacc parser for Pixelman 
+*  Teresa Choe 
+*  Anthony Chan
+*  Brian Tsau
+*  Gabriel Kramer-Garcia 
+*/
 
 %{
 open Ast
@@ -12,7 +17,7 @@ open Ast
 
 %token NOVECLBRACKET
 %token BREAK CONTINUE
-%token LSHIFT RSHIFT BITAND BITXOR BITOR MOD DIVINT 
+%token LSHIFT RSHIFT BITAND BITXOR BITOR MOD 
 %token <int> INT_LITERAL
 %token <string> ID
 %token <char> CHAR_LITERAL
@@ -135,7 +140,6 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr DIVINT expr { Binop($1, Divint,   $3) }
   | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }

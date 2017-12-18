@@ -1,15 +1,11 @@
-(* Code generation: translate takes a semantically checked AST and
-produces LLVM IR
-
-LLVM tutorial: Make sure to read the OCaml version of the tutorial
-
-http://llvm.org/docs/tutorial/index.html
-
-Detailed documentation on the OCaml LLVM library:
-
-http://llvm.moe/
-http://llvm.moe/ocaml/
-
+(* pixelman's Code generation: translate takes a semantically checked AST and produces LLVM IR
+ * http://llvm.org/docs/tutorial/index.html
+ * http://llvm.moe/
+ * http://llvm.moe/ocaml/
+ * Teresa Choe
+ * Brian Tsau
+ * Anthony Chan
+ * Gabriel Kramer-Garcia
 *)
 
 module L = Llvm
@@ -145,6 +141,9 @@ let translate (globals, functions) =
                            | _ -> raise(Failure("illegal type operation")) ))
           | A.And     -> L.build_and
 	  | A.Or      -> L.build_or
+          | A.Bitxor  -> L.build_xor
+          | A.Bitand  -> L.build_and
+          | A.Bitor   -> L.build_or
           | A.Shiftright -> L.build_lshr
           | A.Shiftleft -> L.build_shl
           | A.Equal   -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
