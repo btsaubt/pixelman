@@ -12,7 +12,7 @@ def int main() {
   b = 2; 
   c = 10; 
   if(10%2 == 0) { 
-    print(5);
+    print_int(5);
     return 0;
   }
 

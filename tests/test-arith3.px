@@ -8,6 +8,6 @@ def int main()
   int a;
   a = 42;
   a = a + 5;
-  print(a);
+  print_int(a);
   return 0;
 }

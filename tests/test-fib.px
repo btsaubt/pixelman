@@ -6,11 +6,11 @@ def int fib(int x)
 
 def int main()
 {
-  print(fib(0));
-  print(fib(1));
-  print(fib(2));
-  print(fib(3));
-  print(fib(4));
-  print(fib(5));
+  print_int(fib(0));
+  print_int(fib(1));
+  print_int(fib(2));
+  print_int(fib(3));
+  print_int(fib(4));
+  print_int(fib(5));
   return 0;
 }

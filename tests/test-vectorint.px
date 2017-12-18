@@ -3,6 +3,6 @@ def int main(){
 	int i;
 	v1 = [1,2,3,4,5];
 	for(i = 0;i<5;i=i+1){
-		print(v1[i]);
+		print_int(v1[i]);
 	}
 }

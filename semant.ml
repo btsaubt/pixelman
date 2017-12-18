@@ -35,7 +35,7 @@ let check (globals, functions) =
 
   (**** Checking Functions ****)
 
-  let protected_functions = ["print"; "perror"; "scan"; "size"; "load"; "write";
+  let protected_functions = ["print_int"; "perror"; "scan"; "size"; "load"; "write";
                                  "display"; "resize"; "transform"; "print_float"; "print_string"] in
   let rec check_protected = function
     [] -> ()
@@ -48,8 +48,8 @@ let check (globals, functions) =
     (List.map (fun fd -> fd.fname) functions);
 
   (* Function declaration for a named function *)
-  let built_in_decls =  StringMap.add "print"
-     { typ = Void; fname = "print"; formals = [(Int, "x")];
+  let built_in_decls =  StringMap.add "print_int"
+     { typ = Void; fname = "print_int"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "printb"
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
        locals = []; body = [] } (StringMap.add "printbig"
