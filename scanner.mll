@@ -67,8 +67,8 @@ rule token = parse
 | "else"     { ELSE }
 | "for"      { FOR }
 | "while"    { WHILE }
-| "continue" { CONTINUE } 
-| "break"    { BREAK } 
+(* | "continue" { CONTINUE } 
+| "break"    { BREAK } *)
 | "return"   { RETURN }
 
 	(* function definition *)

@@ -121,8 +121,8 @@ stmt:
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
-  | BREAK SEMI { Break }  
-  | CONTINUE SEMI { Continue } 
+  /* | BREAK SEMI { Break }  
+  | CONTINUE SEMI { Continue } */
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -154,7 +154,7 @@ expr:
   | NOT expr         { Unop(Not, $2) }
   | INTCAST expr    { Unop(IntCast, $2) }
   | FLOATCAST expr  { Unop(FloatCast, $2) }
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | expr ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }

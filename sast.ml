@@ -14,9 +14,9 @@ type sexpr =
   | SId of string * typ
   | SBinop of sexpr * op * sexpr * typ
   | SUnop of uop * sexpr * typ
-  | SAssign of string * sexpr * typ
-  | SVecAccess of string * expr * typ
-  | SMatAccess of string * expr * expr * typ
+  | SAssign of sexpr * sexpr * typ
+  | SVecAccess of string * sexpr * typ
+  | SMatAccess of string * sexpr * sexpr * typ
   | SCall of string * sexpr list * typ
   | SNoexpr
 
@@ -28,10 +28,8 @@ type sstmt =
   | SIf of sexpr * sstmt * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
-  | SBreak
-  | SContinue 
-
-(* type svdecl = *)
+  (* | SBreak
+  | SContinue  *)
 
 (* sfunction sdeclarations *)
 type sfunc_decl = {

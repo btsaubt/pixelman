@@ -168,10 +168,11 @@ let check (globals, functions) =
         | FloatCast -> Float
         | _ -> raise (Failure ("this is impossible to reach :~)"))
       in
-      match t with
-        Int  -> SUnop(op, se, op_t)
-        | Float -> SUnop(op, se, op_t)
-        | _ -> raise (Failure ("can only cast int/float languages "))
+      if t == op_t then se else
+        match t with
+          Int  -> SUnop(op, se, op_t)
+          | Float -> SUnop(op, se, op_t)
+          | _ -> raise (Failure ("can only cast int/float languages "))
 
     and get_equality_type se1 se2 op = 
       let t1 = get_sexpr_type se1 in
@@ -193,8 +194,8 @@ let check (globals, functions) =
       | Vector_Literal(el) -> check_vector_types el
       | Matrix_Literal(ell) -> check_matrix_types ell
       | Id s -> SId(s, type_of_identifier s)
-      | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, e, access_type (type_of_identifier v))
-      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, e1, e2, access_type (type_of_identifier v))
+      | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, expr_to_sexpr e, access_type (type_of_identifier v))
+      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
@@ -259,12 +260,12 @@ let check (globals, functions) =
                 ( match v2 with
                   Vector(ty2, Int_Literal(i2)) -> ty1 == ty2 && i1 == i2
                   | _ -> raise (Failure ("cannot compare vectors and matrices")) )
-        | Matrix(ty1, Int_Literal(i11), Int_Literal(i22)) -> 
+        | Matrix(ty1, Int_Literal(i11), Int_Literal(i12)) -> 
                         ( match v2 with
                           Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> 
-                                  ty1 == ty2 && i11 == i21 && i22 == i22
+                                  ty1 == ty2 && i11 == i21 && i12 == i22
                           | _ -> raise (Failure ("cannot compare vectors and matrices")) )
-        | _ -> raise (Failure ("failfailfafilafilaflia"))
+        | _ -> raise (Failure (""))
 
     and get_binop_sexpr e1 e2 op =
       let se1 = expr_to_sexpr e1 in
@@ -283,18 +284,21 @@ let check (globals, functions) =
         | Not -> get_unop_boolean_sexpr se op
         | IntCast | FloatCast -> get_unop_cast_sexpr se op
 
-    and get_assign_sexpr var e =
-      let lt = type_of_identifier var in
-      let se = expr_to_sexpr e in
-      let rt = get_sexpr_type se in
+    and get_assign_sexpr e1 e2 =
+      let se1 = match e1 with
+        Id(_) | VecAccess(_,_) | MatAccess(_,_,_) -> expr_to_sexpr e1
+        | _ -> raise (Failure ("can only assign to variable or vector/matrix element"))
+      in 
+      let se2 = expr_to_sexpr e2 in
+      let lt = get_sexpr_type se1 in
+      let rt = get_sexpr_type se2 in
       match lt with 
-      Vector(t,e) -> if compare_vector_matrix_type lt rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment "))
-        | Matrix(t,e,_) -> if compare_vector_matrix_type lt rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment "))
-        | _ -> 
-      if lt == rt then SAssign(var,se,lt) else raise (Failure ("illegal assignment " ^
-         string_of_typ lt ^ " = " ^ string_of_typ rt ^ " in " ^ string_of_expr e))
-
-
+      Vector(_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
+        | Matrix(_,_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
+        | _ -> if lt == rt then SAssign(se1,se2,lt) 
+               else raise (Failure ("illegal assignment " ^
+               string_of_typ lt ^ " = " ^ string_of_typ rt ^ 
+               " in: " ^ string_of_expr e1 ^ " = " ^ string_of_expr e2))
 
     and check_bool_expr e = if get_sexpr_type (expr_to_sexpr e) != Bool
       then raise (Failure ("expected boolean expression in " ^ string_of_expr e))
@@ -323,8 +327,8 @@ let check (globals, functions) =
       | If(p, b1, b2) -> check_bool_expr p; SIf(expr_to_sexpr p, stmt_to_sstmt b1, stmt_to_sstmt b2)
       | For(e1, e2, e3, st) -> SFor(expr_to_sexpr e1, expr_to_sexpr e2, expr_to_sexpr e3, stmt_to_sstmt st)
       | While(p, s) -> check_bool_expr p; SWhile(expr_to_sexpr p, stmt_to_sstmt s)
-      | Break -> SBreak
-      | Continue -> SContinue
+      (* | Break -> SBreak
+      | Continue -> SContinue *)
     in
 
     (* check variable declaration type *)

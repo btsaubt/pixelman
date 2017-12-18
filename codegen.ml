@@ -46,8 +46,8 @@ let translate (globals, functions) =
                              A.Int -> array_t i32_t ((int_lit_to_int s1) * (int_lit_to_int s2))
                             | A.Float -> array_t f_t ((int_lit_to_int s1) * (int_lit_to_int s2))
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
+    (* | A.Image(h,w) -> IMPLEMENT IMAGE HERE *)
   in
-
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
     let global_var m (t, n) =
@@ -107,17 +107,25 @@ let translate (globals, functions) =
                    with Not_found -> StringMap.find n global_vars
     in
 
+    let rec get_vector_acc_addr s e1 = L.build_gep (lookup s) 
+        [| (L.const_int i32_t 0); (expr builder e1) |] s builder
+
+    and get_matrix_acc_addr s e1 e2 = L.build_gep (lookup s) 
+        [| L.const_int i32_t 0; expr builder e1; expr builder e2 |] s builder
+
     (* Construct code for an expression; return its value *)
-    let rec expr builder = function
-	S.SInt_Literal i -> L.const_int i32_t i
+    and expr builder = function
+	    S.SInt_Literal i -> L.const_int i32_t i
       | S.SFloat_Literal fl -> L.const_float f_t fl
       | S.SChar_Literal c -> L.const_int i8_t (Char.code c)
       | S.SString_Literal s -> L.build_global_stringptr s "s" builder
       | S.SBool_Literal b -> L.const_int i1_t (if b then 1 else 0)
       | S.SVector_Literal (l, t) -> L.const_array (ltype_of_typ t) (Array.of_list (List.map (expr builder) l))
       | S.SNoexpr -> L.const_int i32_t 0
-      | S.SId (s, t) -> L.build_load (lookup s) s builder
-      | S.SBinop (e1, op, e2, _) ->
+      | S.SId (s, _) -> L.build_load (lookup s) s builder
+      | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e) s builder
+      | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2) s builder
+      | S.SBinop (e1, op, e2, t) ->
 	  let e1' = expr builder e1
 	  and e2' = expr builder e2 in
 	  (match op with
@@ -144,7 +152,7 @@ let translate (globals, functions) =
                            | "i32"  -> L.build_sdiv
                            | _ -> raise(Failure("illegal type operation")) ))
           | A.And     -> L.build_and
-	  | A.Or      -> L.build_or
+	        | A.Or      -> L.build_or
           | A.Shiftright -> L.build_lshr
           | A.Shiftleft -> L.build_shl
           | A.Equal   -> (let e1_type_string = L.string_of_lltype (L.type_of e1') in 
@@ -178,13 +186,18 @@ let translate (globals, functions) =
                            | "i32"   -> L.build_icmp L.Icmp.Sge
                            | _ -> raise(Failure("Illegal type operation" )) )) 
 	  ) e1' e2' "tmp" builder
-      | S.SUnop(op, e, _) ->
-	  let e' = expr builder e in
-	  (match op with
-	    A.Neg     -> L.build_neg
+      | S.SUnop(op, e, _) -> let e' = expr builder e in
+	    (match op with
+	        A.Neg       -> L.build_neg
           | A.Not     -> L.build_not) e' "tmp" builder
-      | S.SAssign (s, e, _) -> let e' = expr builder e in
-	                   ignore (L.build_store e' (lookup s) builder); e'
+      | S.SAssign (v, e, _) -> let lsb = (match v with
+                                 S.SId(n,_) -> lookup n
+                                 | S.SVecAccess(s,e,_) -> get_vector_acc_addr s e
+                                 | S.SMatAccess(s,e1,e2,_) -> get_matrix_acc_addr s e1 e2
+                                 | _ -> raise(Failure("Illegal assignment lvalue")))
+                               in
+                               let rsb = expr builder e in
+                               ignore (L.build_store rsb lsb builder); rsb
       | S.SCall ("print_int", [e], _) ->
 	        L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	        "printf" builder
