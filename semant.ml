@@ -142,26 +142,60 @@ let check (globals, functions) =
         | (Int, Float) -> SBinop(SUnop(FloatCast, se1, Float), op, se2, Float)
         | (Float, Int) -> SBinop(se1, op, SUnop(FloatCast, se2, Float), Float)
         | (Float, Float) -> SBinop(se1, op, se2, Float)
-        (* | (Matrix(tm1, Int_Literal(i), Int_Literal(j)), tm2) -> (match op with
-          Mult -> (match tm2 with (* matrix x t check *)
-                      Float -> SCall("scalar_mult_matf", [se2, se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                      | Int -> if tm1 == Float 
-                        then SCall("scalar_mult_matf", [se2, se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                        else SCall("scalar_mult_mati", [se2, se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
-                      | Vector(tv2, Int_Literal(i2)) (* a vector is treated as a n x 1 matrix *) -> if i != i2 
-                        then raise(Failure("cannot multiply matrix of dimension " ^ 
-                          string_of_int i ^ "x" ^ string_of_int j ^ 
-                          " by a vector of dimension " ^ string_of_int i2))
-                        else SCall("vec_mat_mult", [se1, se2], Matrix())
-                      | Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if i != i2 
-                        then raise(Failure("cannot multiply matrix of dimension " ^ 
-                          string_of_int i ^ "x" ^ string_of_int j ^ 
-                          " by a vector of dimension " ^ string_of_int i2))
-                      | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
-                  )
-        ) *)
-        | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
+        | (Vector(tm1, Int_Literal(i)), ta2) -> (match op with
+              Mult -> (match ta2 with 
+                  Float -> SCall("scalar_mult_vec", [se2; se1], Vector(Float, Int_Literal(i)))
+                  | Int -> if tm1 == Float 
+                    then SCall("scalar_mult_vec", [se2; se1], Vector(Float, Int_Literal(i)))
+                    else SCall("scalar_mult_vec", [se2; se1], Vector(Int, Int_Literal(i)))
+                  | Vector(tm2, Int_Literal(i2)) -> if i != i2 
+                    then raise(Failure("oh no! cannot perform dot product with vector of dimension " ^ 
+                                       string_of_int i ^ "x" ^ string_of_int i2 ^ 
+                                       " by a vector of dimension " ^ string_of_int i2))
+                    else if tm2 == Float || tm1 == Float 
+                      then SCall("vec_dot_product", [se2; se1], Vector(Float, Int_Literal(i)))
+                      else SCall("vec_dot_product", [se2; se1], Vector(Int, Int_Literal(i)))
+              )
 
+          )
+        | (Matrix(tm1, Int_Literal(i), Int_Literal(j)), ta2) -> (match op with
+          Mult -> (match ta2 with (* matrix x ta2 check *)
+                      Float -> SCall("scalar_mult_mat", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                
+                      | Int -> if tm1 == Float 
+                        then SCall("scalar_mult_mat", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                        else SCall("scalar_mult_mat", [se2; se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                      
+                      | Vector(tm2, Int_Literal(i2)) (* a vector is treated as a n x 1 matrix *) -> if i != i2 
+                        then raise(Failure("cannot multiply matrix of dimension " ^ 
+                                    string_of_int i ^ "x" ^ string_of_int j ^ 
+                                    " by a vector of dimension " ^ string_of_int i2))
+                        else if tm2 == Float || tm1 == Float  
+                          then SCall("vec_mat_mult", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                          else SCall("vec_mat_mult", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                      
+                      | Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if j != i2 
+                        then raise(Failure("cannot multiply matrix of dimension " ^ 
+                          string_of_int i ^ "x" ^ string_of_int j ^ 
+                          " by a vector of dimension " ^ string_of_int i2))
+                        else if tm2 == Float || tm1 == Float 
+                          then SCall("mat_mat_mult", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                          else SCall("mat_mat_mult", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                      | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
+              )
+            | Sub | Add -> (match ta2 with 
+                  Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if j != i2
+                  then raise(Failure("oh no! cannot add/subtract matrix of dimension " ^
+                                     string_of_int i ^ "x" ^ string_of_int j ^ 
+                                     " by a matrix of dimension " ^ string_of_int i2 ^
+                                     "x" ^ string_of_int j2))
+                  else if tm2 == Float || tm1 == Float 
+                    then SCall("mat_sub_or_add", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                    else SCall("mat_sub_or_add", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                 | _ -> raise (Failure ("oh no! cannot perform this operation on matrix.") )
+              )
+        | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
+        )
     and get_unop_arithmetic_sexpr se op = 
       let t = get_sexpr_type se in
       match t with

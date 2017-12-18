@@ -1,0 +1,9 @@
+def int main() {
+ (: this is a comment. 
+    it should not return anything. :) 
+
+ :) this is a single line comment. hello! 
+
+ return 0; 
+
+} 
