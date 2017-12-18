@@ -28,6 +28,10 @@ rule token = parse
 	(* Assignment Operators *)
 | '='      { ASSIGN }
 
+	(* Casting Operators *)
+| "$int"    { INT }
+| "$float"  { FLOAT } 
+
     (* Binary Arithmetic Operators *)
 | '+'      { PLUS }
 | '-'      { MINUS }
