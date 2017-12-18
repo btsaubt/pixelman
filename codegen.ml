@@ -39,8 +39,8 @@ let translate (globals, functions) =
                             | A.Float -> array_t f_t (int_lit_to_int size)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
     | A.Matrix(t, s1, s2) -> (match t with 
-                             A.Int -> array_t i32_t ((int_lit_to_int s1) * (int_lit_to_int s2))
-                            | A.Float -> array_t f_t ((int_lit_to_int s1) * (int_lit_to_int s2))
+                             A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
+                            | A.Float -> array_t (array_t f_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
     (* | A.Image(h,w) -> IMPLEMENT IMAGE HERE *)
   in
@@ -117,6 +117,24 @@ let translate (globals, functions) =
       | S.SString_Literal s -> L.build_global_stringptr s "s" builder
       | S.SBool_Literal b -> L.const_int i1_t (if b then 1 else 0)
       | S.SVector_Literal (l, t) -> L.const_array (ltype_of_typ t) (Array.of_list (List.map (expr builder) l))
+      | S.SMatrix_Literal (ell, t) -> (match t with 
+            A.Matrix(A.Float,i,j) -> 
+              let order = List.map List.rev ell in 
+              let f_lists = List.map (List.map (expr builder)) order in
+              let array_list = List.map Array.of_list f_lists in 
+              let f_list_list = List.rev (List.map (L.const_array f_t) array_list) in
+              let array_of_arrays = Array.of_list f_list_list in 
+                L.const_array(array_t f_t (List.length (List.hd ell))) array_of_arrays 
+          | A.Matrix(A.Int, i, j) -> 
+            let order = List.map List.rev ell in 
+            let i_lists = List.map (List.map (expr builder)) order in 
+            let array_list = List.map Array.of_list i_lists in
+            let i_list_array = List.rev (List.map (L.const_array i32_t) array_list) in 
+            let array_of_arrays = Array.of_list i_list_array in 
+              L.const_array(array_t i32_t (List.length (List.hd ell))) array_of_arrays 
+          | _ -> raise(Failure(A.string_of_typ t)) 
+        )
+
       | S.SNoexpr -> L.const_int i32_t 0
       | S.SId (s, _) -> L.build_load (lookup s) s builder
       | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e) s builder

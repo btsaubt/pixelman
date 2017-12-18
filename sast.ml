@@ -15,7 +15,7 @@ type sexpr =
   | SString_Literal of string
   | SBool_Literal of bool
   | SVector_Literal of sexpr list * typ
-  | SMatrix_Literal of sexpr list list *typ
+  | SMatrix_Literal of sexpr list list * typ
   | SId of string * typ
   | SBinop of sexpr * op * sexpr * typ
   | SUnop of uop * sexpr * typ
