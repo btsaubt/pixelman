@@ -22,14 +22,13 @@ let translate (globals, functions) =
   and i1_t     = L.i1_type    context
   and f_t      = L.double_type context
   and array_t  = L.array_type
-  and struct_t = L.struct_t
   and ptr_t    = L.pointer_type
   and void_t   = L.void_type  context in
 
   let int_lit_to_int = function
     A.Int_Literal(i) -> i | _ -> raise(Failure("Can only make vector/matrix of dimension int literal"))
   in
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> f_t
     | A.Bool -> i1_t
@@ -45,14 +44,15 @@ let translate (globals, functions) =
                           | A.Float -> ptr_t f_t
                           | _ -> raise(Failure("Can only make vector of type int/float")))
     | A.Matrix(t, s1, s2) -> (match t with 
-                             A.Int -> array_t i32_t ((int_lit_to_int s1) * (int_lit_to_int s2))
-                            | A.Float -> array_t f_t ((int_lit_to_int s1) * (int_lit_to_int s2))
-                            | _ -> raise(Failure("Can only make Matrix of type int/float")))
+                          A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
+                            | A.Float -> array_t (array_t f_t (int_lit_to_int s1)) (int_lit_to_int s2)
+                            | _ -> raise(Failure("Cannot only make vector of type int/float")))
     | A.MatrixPtr(t) -> (match t with
                           A.Int   -> ptr_t i32_t
                           | A.Float -> ptr_t f_t
                           | _ -> raise(Failure("Can only make vector of type int/float")))
-    | A.Image(h,w) -> struct_t [| A.Matrix(A.Int, h, w); A.Matrix(A.Int, h, w); A.Matrix(A.Int, h, w) |]
+    | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w)) in
+          array_t mat_t 3 (* make an array of 3 h x w matrices *)
     | A.ImagePtr -> ptr_t i32_t
   in
   (* Declare each global variable; remember its value in a map *)
@@ -128,6 +128,24 @@ let translate (globals, functions) =
       | S.SString_Literal s -> L.build_global_stringptr s "s" builder
       | S.SBool_Literal b -> L.const_int i1_t (if b then 1 else 0)
       | S.SVector_Literal (l, t) -> L.const_array (ltype_of_typ t) (Array.of_list (List.map (expr builder) l))
+      | S.SMatrix_Literal (ell, t) -> (match t with 
+            A.Matrix(A.Float,i,j) -> 
+              let order = List.map List.rev ell in 
+              let f_lists = List.map (List.map (expr builder)) order in
+              let array_list = List.map Array.of_list f_lists in 
+              let f_list_list = List.rev (List.map (L.const_array f_t) array_list) in
+              let array_of_arrays = Array.of_list f_list_list in 
+                L.const_array(array_t f_t (List.length (List.hd ell))) array_of_arrays 
+          | A.Matrix(A.Int, i, j) -> 
+            let order = List.map List.rev ell in 
+            let i_lists = List.map (List.map (expr builder)) order in 
+            let array_list = List.map Array.of_list i_lists in
+            let i_list_array = List.rev (List.map (L.const_array i32_t) array_list) in 
+            let array_of_arrays = Array.of_list i_list_array in 
+              L.const_array(array_t i32_t (List.length (List.hd ell))) array_of_arrays 
+          | _ -> raise(Failure(A.string_of_typ t)) 
+        )
+
       | S.SNoexpr -> L.const_int i32_t 0
       | S.SId (s, _) -> L.build_load (lookup s) s builder
       | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e) s builder

@@ -369,7 +369,7 @@ let check (globals, functions) =
 
     let check_int_literal_expr e = match e with
       Int_Literal(_) -> ()
-      | -> raise(Failure("can only declare vectors/matrices/images with int literals"))
+      | _ -> raise(Failure("can only declare vectors/matrices/images with int literals"))
     in
 
     (* check variable declaration type *)
