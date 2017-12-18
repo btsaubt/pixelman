@@ -39,7 +39,7 @@ let translate (globals, functions) =
                              A.Int -> array_t i32_t (int_lit_to_int size)
                             | A.Float -> array_t f_t (int_lit_to_int size)
                             | _ -> raise(Failure("Can only make vector of type int/float")))
-    | A.VectorPtr(t) -> (match t with
+    | A.VectorPtr(t) -> print_string "vecptr"; (match t with
                           A.Int   -> ptr_t i32_t
                           | A.Float -> ptr_t f_t
                           | _ -> raise(Failure("Can only make vector of type int/float")))
@@ -47,13 +47,13 @@ let translate (globals, functions) =
                           A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | A.Float -> array_t (array_t f_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
-    | A.MatrixPtr(t) -> (match t with
+    | A.MatrixPtr(t) -> print_string "matptr"; (match t with
                           A.Int   -> ptr_t i32_t
                           | A.Float -> ptr_t f_t
                           | _ -> raise(Failure("Can only make vector of type int/float")))
     | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w)) in
           array_t mat_t 3 (* make an array of 3 h x w matrices *)
-    | A.ImagePtr -> ptr_t i32_t
+    | A.ImagePtr ->       print_string "imgptr"; ptr_t i32_t
   in
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -129,14 +129,14 @@ let translate (globals, functions) =
       | S.SBool_Literal b -> L.const_int i1_t (if b then 1 else 0)
       | S.SVector_Literal (l, t) -> L.const_array (ltype_of_typ t) (Array.of_list (List.map (expr builder) l))
       | S.SMatrix_Literal (ell, t) -> (match t with 
-            A.Matrix(A.Float,i,j) -> 
+            A.Matrix(A.Float,_,_) -> 
               let order = List.map List.rev ell in 
               let f_lists = List.map (List.map (expr builder)) order in
               let array_list = List.map Array.of_list f_lists in 
               let f_list_list = List.rev (List.map (L.const_array f_t) array_list) in
               let array_of_arrays = Array.of_list f_list_list in 
                 L.const_array(array_t f_t (List.length (List.hd ell))) array_of_arrays 
-          | A.Matrix(A.Int, i, j) -> 
+          | A.Matrix(A.Int,_,_) -> 
             let order = List.map List.rev ell in 
             let i_lists = List.map (List.map (expr builder)) order in 
             let array_list = List.map Array.of_list i_lists in
@@ -150,7 +150,7 @@ let translate (globals, functions) =
       | S.SId (s, _) -> L.build_load (lookup s) s builder
       | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e) s builder
       | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2) s builder
-      | S.SBinop (e1, op, e2, t) ->
+      | S.SBinop (e1, op, e2, _) -> (* too late to implement using sexpr types to make things easier *)
 	  let e1' = expr builder e1
 	  and e2' = expr builder e2 in
 	  (match op with
@@ -214,10 +214,12 @@ let translate (globals, functions) =
                            | "i32"   -> L.build_icmp L.Icmp.Sge
                            | _ -> raise(Failure("Illegal type operation" )) )) 
 	  ) e1' e2' "tmp" builder
-      | S.SUnop(op, e, _) -> let e' = expr builder e in
+      | S.SUnop(op, e, t) -> let e' = expr builder e in
 	    (match op with
-	        A.Neg       -> L.build_neg
-          | A.Not     -> L.build_not) e' "tmp" builder
+	        A.Neg         -> (if t == A.Float then L.build_fneg else L.build_neg) e' "tmp" builder
+          | A.Not       -> L.build_not e' "tmp" builder
+          | A.IntCast   -> L.build_fptosi e' i32_t "float_to_int" builder
+          | A.FloatCast -> L.build_sitofp e' f_t   "int_to_float" builder )
       | S.SAssign (v, e, _) -> let lsb = (match v with
                                  S.SId(n,_) -> lookup n
                                  | S.SVecAccess(s,e,_) -> get_vector_acc_addr s e
@@ -300,10 +302,6 @@ let translate (globals, functions) =
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.S.styp with
         A.Void -> L.build_ret_void
-      (* | A.VectorPtr -> (match t with
-        )
-      | A.MatrixPtr -> 
-      | A.ImagePtr -> *)
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
   in
 
