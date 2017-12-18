@@ -15,8 +15,10 @@ let int_lit = digit+
 
 rule token = parse
   whitespace { token lexbuf }             (* Whitespace *)
-  | ":)"     { comment lexbuf } 
-    (* Separators *)
+  | ":)"     { sl_comment lexbuf } 
+  | "(:"     { comment lexbuf }
+
+  (* Separators *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
@@ -100,10 +102,10 @@ rule token = parse
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
-(*and comment = parse 
+and comment = parse 
   ":)" { token lexbuf } 
   | _  { comment lexbuf } 
-*)
-and comment = parse
+
+and sl_comment = parse
   | '\n' { token lexbuf }
-  | _    { comment lexbuf }
+  | _    { sl_comment lexbuf }
