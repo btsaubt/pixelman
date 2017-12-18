@@ -1,0 +1,5 @@
+def int main() {
+    int[3] a;
+    print_int(a[2]);
+    return 0;
+}

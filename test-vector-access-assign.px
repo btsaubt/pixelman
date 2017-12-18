@@ -1,0 +1,6 @@
+def int main(){
+    int[3] a;
+    a[2] = 42;
+    print_int(a[2]+3);
+    return 0;
+}
