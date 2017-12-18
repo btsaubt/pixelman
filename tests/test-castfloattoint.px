@@ -1,0 +1,7 @@
+def int main(){
+	float a;
+	int b;
+	a = 5.0;
+	b = int(a);
+	print_int(b);
+}
