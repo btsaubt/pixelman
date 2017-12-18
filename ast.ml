@@ -1,4 +1,9 @@
-(* Abstract Syntax Tree and functions for printing it *)
+(* Abstract Syntax Tree and functions for printing it 
+ * Anthony Chan
+ * Gabriel Kramer-Garcia
+ * Brian Tsau
+ * Teresa Choe
+*)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
           And | Or | Divint | Shiftleft | Shiftright | Bitand | Bitor | Bitxor |

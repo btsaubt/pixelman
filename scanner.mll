@@ -1,4 +1,9 @@
-(* Ocamllex scanner for pixelman *)
+(* Ocamllex scanner for pixelman 
+ * Brian Tsau
+ * Teresa Choe
+ * Gabriel Kramer-Garcia
+ * Anthony Chan
+ * *)
 
 { open Parser }
 
@@ -38,7 +43,6 @@ rule token = parse
 | '*'      { TIMES }
 | '/'      { DIVIDE }
 | "%"      { MOD } 
-| "//"     { DIVINT } 
 
 	(* Binary Comparison Operators *)
 | "=="     { EQ }
@@ -91,8 +95,7 @@ rule token = parse
 | ''' character '''    as lxm    { CHAR_LITERAL(lxm.[1]) }
 | '"' ((character*) as lxm) '"' { STRING_LITERAL(lxm) }
 | float_lit as lxm   { FLOAT_LITERAL(float_of_string lxm) } 
-(*| '{' int_lit as lxm '}' { VECTOR_LITERAL(int_of_string lxm) } 
-*)
+
 (* Comment *) 
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
