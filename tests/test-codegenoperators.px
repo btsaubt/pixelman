@@ -12,8 +12,8 @@ def int main() {
   d = 1.2;
   e = 0.5; 
 
-  print(a >> b); 
-  print(a << b); 
+  print_int(a >> b); 
+  print_int(a << b); 
   
   printb(c+d == 3.7); 
   printb(c-d == 1.3); 

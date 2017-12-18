@@ -3,15 +3,15 @@ def int main() {
   int b;
   a = 1;
   b = 2;
-  print(a);
-  print(b);
-  print(a >> b);
-  print(a ^ b);
-  print(a & b);
-  print(a | b); 
-  print(a << b);
-  print(a % b); 
-  print(a // b);
+  print_int(a);
+  print_int(b);
+  print_int(a >> b);
+  print_int(a ^ b);
+  print_int(a & b);
+  print_int(a | b); 
+  print_int(a << b);
+  print_int(a % b); 
+  print_int(a // b);
 
   return a; 
 }

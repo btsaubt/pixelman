@@ -29,8 +29,8 @@ rule token = parse
 | '='      { ASSIGN }
 
 	(* Casting Operators *)
-| "$int"    { INT }
-| "$float"  { FLOAT } 
+| "$int"    { INTCAST }
+| "$float"  { FLOATCAST } 
 
     (* Binary Arithmetic Operators *)
 | '+'      { PLUS }
