@@ -114,6 +114,7 @@ let translate (globals, functions) =
       | S.SChar_Literal c -> L.const_int i8_t (Char.code c)
       | S.SString_Literal s -> L.build_global_stringptr s "s" builder
       | S.SBool_Literal b -> L.const_int i1_t (if b then 1 else 0)
+      | S.SVector_Literal (l, t) -> L.const_array (ltype_of_typ t) (Array.of_list (List.map (expr builder) l))
       | S.SNoexpr -> L.const_int i32_t 0
       | S.SId (s, t) -> L.build_load (lookup s) s builder
       | S.SBinop (e1, op, e2, _) ->
