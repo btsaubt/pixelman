@@ -12,5 +12,5 @@ def int main() {
   print_int(a << b);
   print_int(a % b); 
 
-  return a; 
+  return 0; 
 }
