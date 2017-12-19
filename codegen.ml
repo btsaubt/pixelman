@@ -141,6 +141,7 @@ let translate (globals, functions) =
 
       | S.SNoexpr -> L.const_int i32_t 0
       | S.SId (s, _) -> L.build_load (lookup s) s builder
+      | S.SSizeOf(vm,_) -> L.const_int i32_t (L.array_length (L.element_type (L.type_of (lookup vm))))
       | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e builder) s builder
       | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2 builder) s builder
       | S.SBinop (e1, op, e2, _) -> (* too late to implement using sexpr types to make things easier *)

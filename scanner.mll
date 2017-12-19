@@ -90,6 +90,7 @@ rule token = parse
 | "true"   { TRUE }
 | "false"  { FALSE }
 | "Image"  { IMAGE }
+| "sizeof" { SIZEOF }
 
 (* Literals *)
 | int_lit   as lxm    { INT_LITERAL(int_of_string lxm) }
