@@ -211,7 +211,7 @@ let check (globals, functions) =
               check_int_expr e1; 
               check_int_expr e2; 
               SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
-      | SizeOf(vm) -> SSizeOf(vm, type_of_identifier vm)
+      | SizeOf(vm) -> SSizeOf(vm, Int)
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr

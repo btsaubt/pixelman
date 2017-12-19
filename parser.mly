@@ -159,11 +159,11 @@ expr:
   | INTCAST expr    { Unop(IntCast, $2) }
   | FLOATCAST expr  { Unop(FloatCast, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
+  | SIZEOF LPAREN ID RPAREN  { SizeOf($3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
   | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
-  | SIZEOF LPAREN ID RPAREN { SizeOf($3) }
 
 
 primitive_literals:

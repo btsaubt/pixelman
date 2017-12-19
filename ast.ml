@@ -102,6 +102,7 @@ and(* rec *) string_of_expr = function
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1  ^ " = " ^ string_of_expr e2
 (*   | Assign(v, e2) -> v ^ " = " ^ string_of_expr e2 *)
+  | SizeOf(s) -> "sizeof(" ^ s ^ ")"
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
