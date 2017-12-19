@@ -417,7 +417,12 @@ let check (globals, functions) =
 
     and check_int_expr e = if get_sexpr_type (expr_to_sexpr e) != Int
       then raise (Failure ("expected integer expression in " ^ string_of_expr e))
-      else () in
+      else ()
+
+    and check_int_literal_expr e = match e with
+      Int_Literal(_) -> ()
+      | _ -> raise(Failure("can only declare vectors/matrices/images with int literals"))
+    in
 
     (* Return a sstmt given a stmt *)
     let rec stmt_to_sstmt = function
@@ -442,11 +447,6 @@ let check (globals, functions) =
       | Continue -> SContinue *)
     in
 
-    let check_int_literal_expr e = match e with
-      Int_Literal(_) -> ()
-      | _ -> raise(Failure("can only declare vectors/matrices/images with int literals"))
-    in
-
     (* check variable declaration type *)
     let check_var_decl (t, id) = match t with
       Int | Bool | Float | Char | String -> (t, id)
@@ -462,10 +462,15 @@ let check (globals, functions) =
       | Image(h,w) -> check_int_literal_expr h; check_int_literal_expr w; (t, id)
     in
 
+    let check_formal_bind (t, id) = match t with
+      Vector(_,e) -> if e != Noexpr then check_int_literal_expr e else (); (t, id)
+      | Matrix(_,e1,e2) -> if e1 != Noexpr || e2 != Noexpr then (check_int_literal_expr e1; check_int_literal_expr e2) else (); (t, id)
+      | _ -> (t,id)
+    in
     { 
       styp = func.typ;
       sfname = func.fname;
-      sformals = func.formals;
+      sformals = List.map check_formal_bind func.formals;
       slocals = List.map check_var_decl func.locals;
       sbody = List.map stmt_to_sstmt func.body;
     }

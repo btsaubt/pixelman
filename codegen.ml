@@ -39,8 +39,8 @@ let translate (globals, functions) =
                             | A.Float -> array_t f_t (int_lit_to_int size)
                             | _ -> raise(Failure("Can only make vector of type int/float")))
     | A.Matrix(t, s1, s2) -> (match t with 
-                          A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
-                            | A.Float -> array_t (array_t f_t (int_lit_to_int s1)) (int_lit_to_int s2)
+                          A.Int -> array_t (array_t i32_t (int_lit_to_int s2)) (int_lit_to_int s1)
+                            | A.Float -> array_t (array_t f_t (int_lit_to_int s2)) (int_lit_to_int s1)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
     | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w))
                       in array_t mat_t 3 (* make an array of 3 h x w matrices *)
@@ -68,7 +68,7 @@ let translate (globals, functions) =
     let function_decl m fdecl =
       let name = fdecl.S.sfname
       and formal_types =
-	Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.S.sformals)
+	      Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.S.sformals)
       in let ftype = L.function_type (ltype_of_typ fdecl.S.styp) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
     List.fold_left function_decl StringMap.empty functions in
@@ -87,17 +87,20 @@ let translate (globals, functions) =
        value, if appropriate, and remember their values in the "locals" map *)
     let local_vars =
       let add_formal m (t, n) p = L.set_value_name n p;
-	let local = L.build_alloca (ltype_of_typ t) n builder in
-	ignore (L.build_store p local builder);
-	StringMap.add n local m in
+    	let local = L.build_alloca (ltype_of_typ t) n builder in
+    	ignore (L.build_store p local builder);
+    	StringMap.add n local m
+    in
 
-      let add_local m (t, n) =
-	let local_var = L.build_alloca (ltype_of_typ t) n builder
-	in StringMap.add n local_var m in
-
-      let formals = List.fold_left2 add_formal StringMap.empty fdecl.S.sformals
-          (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals fdecl.S.slocals in
+    let add_local m (t, n) =
+	    let local_var = L.build_alloca (ltype_of_typ t) n builder
+	    in StringMap.add n local_var m 
+    in
+    let formals = List.fold_left2 add_formal StringMap.empty fdecl.S.sformals
+          (Array.to_list (L.params the_function)) 
+    in
+      List.fold_left add_local formals fdecl.S.slocals 
+    in
 
     (* Return the value for a variable or formal argument *)
     let lookup n = try StringMap.find n local_vars
@@ -123,14 +126,14 @@ let translate (globals, functions) =
               let order = List.map List.rev ell in 
               let f_lists = List.map (List.map (expr builder)) order in
               let array_list = List.map Array.of_list f_lists in 
-              let f_list_list = List.rev (List.map (L.const_array f_t) array_list) in
+              let f_list_list = List.map (L.const_array f_t) array_list in
               let array_of_arrays = Array.of_list f_list_list in 
                 L.const_array(array_t f_t (List.length (List.hd ell))) array_of_arrays 
           | A.Matrix(A.Int,_,_) -> 
             let order = List.map List.rev ell in 
             let i_lists = List.map (List.map (expr builder)) order in 
             let array_list = List.map Array.of_list i_lists in
-            let i_list_array = List.rev (List.map (L.const_array i32_t) array_list) in 
+            let i_list_array = List.map (L.const_array i32_t) array_list in 
             let array_of_arrays = Array.of_list i_list_array in 
               L.const_array(array_t i32_t (List.length (List.hd ell))) array_of_arrays 
           | _ -> raise(Failure(A.string_of_typ t)) 
@@ -231,11 +234,6 @@ let translate (globals, functions) =
 	        L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | S.SCall (f, act, _) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-	  let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-	  let result = (match fdecl.S.styp with A.Void -> ""
-                                            | _ -> f ^ "_result") in
-         L.build_call fdef (Array.of_list actuals) result builder
-    in
 
     (* Invoke "f builder" if the current block doesn't already
        have a terminal (e.g., a branch). *)
