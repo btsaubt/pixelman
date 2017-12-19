@@ -39,21 +39,22 @@ let translate (globals, functions) =
                              A.Int -> array_t i32_t (int_lit_to_int size)
                             | A.Float -> array_t f_t (int_lit_to_int size)
                             | _ -> raise(Failure("Can only make vector of type int/float")))
-    | A.VectorPtr(t) -> print_string "vecptr"; (match t with
-                          A.Int   -> ptr_t i32_t
-                          | A.Float -> ptr_t f_t
-                          | _ -> raise(Failure("Can only make vector of type int/float")))
     | A.Matrix(t, s1, s2) -> (match t with 
                           A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | A.Float -> array_t (array_t f_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
-    | A.MatrixPtr(t) -> print_string "matptr"; (match t with
+    | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w))
+                      in array_t mat_t 3 (* make an array of 3 h x w matrices *)
+    (* | A.ImagePtr ->     print_string "imgptr"; ptr_t i32_t
+    | A.VectorPtr(t) -> print_string "vecptr"; (match t with
                           A.Int   -> ptr_t i32_t
                           | A.Float -> ptr_t f_t
                           | _ -> raise(Failure("Can only make vector of type int/float")))
-    | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w)) in
-          array_t mat_t 3 (* make an array of 3 h x w matrices *)
-    | A.ImagePtr ->       print_string "imgptr"; ptr_t i32_t
+    | A.MatrixPtr(t) -> print_string "matptr"; (match t with
+                          A.Int   -> ptr_t i32_t
+                          | A.Float -> ptr_t f_t
+                          | _ -> raise(Failure("Can only make vector of type int/float"))) *)
+    (* | _ -> raise(Failure("can only instantiate pointer types in function formals")) USED ONLY IF WE ALLOW pointers only in formals *)
   in
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -241,8 +242,8 @@ let translate (globals, functions) =
 	        L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | S.SCall (f, act, _) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-	 let result = (match fdecl.S.styp with A.Void -> ""
+	  let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+	  let result = (match fdecl.S.styp with A.Void -> ""
                                             | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list actuals) result builder
     in

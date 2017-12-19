@@ -144,58 +144,77 @@ let check (globals, functions) =
         | (Float, Float) -> SBinop(se1, op, se2, Float)
         | (Vector(tm1, Int_Literal(i)), ta2) -> (match op with
               Mult -> (match ta2 with 
-                  Float -> SCall("scalar_mult_vec", [se2; se1], Vector(Float, Int_Literal(i)))
+                  Float -> SCall("scalar_mult_vecf", [se2; se1], Vector(Float, Int_Literal(i)))
                   | Int -> if tm1 == Float 
-                    then SCall("scalar_mult_vec", [se2; se1], Vector(Float, Int_Literal(i)))
-                    else SCall("scalar_mult_vec", [se2; se1], Vector(Int, Int_Literal(i)))
+                    then SCall("scalar_mult_veci", [se2; se1], Vector(Float, Int_Literal(i)))
+                    else SCall("scalar_mult_vecf", [se2; se1], Vector(Int, Int_Literal(i)))
                   | Vector(tm2, Int_Literal(i2)) -> if i != i2 
                     then raise(Failure("oh no! cannot perform dot product with vector of dimension " ^ 
                                        string_of_int i ^ "x" ^ string_of_int i2 ^ 
                                        " by a vector of dimension " ^ string_of_int i2))
                     else if tm2 == Float || tm1 == Float 
-                      then SCall("vec_dot_product", [se2; se1], Vector(Float, Int_Literal(i)))
-                      else SCall("vec_dot_product", [se2; se1], Vector(Int, Int_Literal(i)))
+                      then SCall("vec_dot_productf", [se2; se1], Float)
+                      else SCall("vec_dot_producti", [se2; se1], Int)
+                  | Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if i2 != 1
+                        then raise(Failure("cannot multiply a vector of dimension " ^ string_of_int i ^ 
+                          "by a matrix of dimension " ^ string_of_int i2 ^ "x" ^ string_of_int j2 
+                          ))
+                        else if tm2 == Float || tm1 == Float 
+                          then SCall("vec_mat_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j2)))
+                          else SCall("vec_mat_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j2)))
+                  | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
               )
-
-          )
+              | Sub -> (match ta2 with 
+                    Vector(tm2, Int_Literal(i)) -> if tm2 == Float || tm1 == Float 
+                      then SCall("vec_subf", [se1; se2], Vector(Float, Int_Literal(i)))
+                      else SCall("vec_subi", [se1; se2], Vector(Int, Int_Literal(i)))
+                      | _ -> raise (Failure ("oh no! can only perform this operation on vector of same length.")))
+              | Add -> (match ta2 with 
+                    Vector(tm2, Int_Literal(i)) -> if tm2 == Float || tm1 == Float 
+                      then SCall("vec_addf", [se1; se2], Vector(Float, Int_Literal(i)))
+                      else SCall("vec_addi", [se1; se2], Vector(Int, Int_Literal(i)))
+                    | _ -> raise (Failure ("oh no! can only perform this operation on vector of same length.")))
+              | _ -> raise (Failure ("oh no! cannot perform this operation on matrix.")))
         | (Matrix(tm1, Int_Literal(i), Int_Literal(j)), ta2) -> (match op with
-          Mult -> (match ta2 with (* matrix x ta2 check *)
-                      Float -> SCall("scalar_mult_mat", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                
+              Mult -> (match ta2 with (* matrix x ta2 check *)
+                      Float -> SCall("scalar_mult_matf", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
                       | Int -> if tm1 == Float 
-                        then SCall("scalar_mult_mat", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                        else SCall("scalar_mult_mat", [se2; se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                        then SCall("scalar_mult_matf", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                        else SCall("scalar_mult_mati", [se2; se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
                       
                       | Vector(tm2, Int_Literal(i2)) (* a vector is treated as a n x 1 matrix *) -> if i != i2 
                         then raise(Failure("cannot multiply matrix of dimension " ^ 
                                     string_of_int i ^ "x" ^ string_of_int j ^ 
                                     " by a vector of dimension " ^ string_of_int i2))
                         else if tm2 == Float || tm1 == Float  
-                          then SCall("vec_mat_mult", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                          else SCall("vec_mat_mult", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
-                      
+                          then SCall("mat_vec_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(1)))
+                          else SCall("mat_vec_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(1)))
                       | Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if j != i2 
                         then raise(Failure("cannot multiply matrix of dimension " ^ 
                           string_of_int i ^ "x" ^ string_of_int j ^ 
                           " by a vector of dimension " ^ string_of_int i2))
                         else if tm2 == Float || tm1 == Float 
-                          then SCall("mat_mat_mult", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                          else SCall("mat_mat_mult", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                          then SCall("mat_mat_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j2)))
+                          else SCall("mat_mat_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j2)))
                       | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
               )
-            | Sub | Add -> (match ta2 with 
-                  Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if j != i2
-                  then raise(Failure("oh no! cannot add/subtract matrix of dimension " ^
-                                     string_of_int i ^ "x" ^ string_of_int j ^ 
-                                     " by a matrix of dimension " ^ string_of_int i2 ^
-                                     "x" ^ string_of_int j2))
-                  else if tm2 == Float || tm1 == Float 
-                    then SCall("mat_sub_or_add", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                    else SCall("mat_sub_or_add", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
-                 | _ -> raise (Failure ("oh no! cannot perform this operation on matrix.") )
-              )
+              | Sub -> (match ta2 with 
+                  Matrix(tm2, Int_Literal(i), Int_Literal(j)) -> if tm2 == Float || tm1 == Float 
+                    then SCall("mat_subf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                    else SCall("mat_subi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                  | _ -> raise (Failure ("oh no! can only perform this operation on matrix of same size.")))
+              | Add -> (match ta2 with 
+                  Matrix(tm2, Int_Literal(i), Int_Literal(j)) -> if tm2 == Float || tm1 == Float 
+                    then SCall("mat_addf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                    else SCall("mat_addi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                    | _ -> raise (Failure ("oh no! can only perform this operation on matrix of same size.")))
+              | _ -> raise (Failure ("oh no! cannot perform this operation on matrix.") ))
+        | (Int, Vector(Int,Int_Literal(i))) -> SCall("scalar_mult_veci", [se1; se2], Vector(Int, Int_Literal(i)))
+        | (Float, Vector(Int,Int_Literal(i))) | (Int, Vector(Float,Int_Literal(i))) | (Float, Vector(Float,Int_Literal(i))) -> SCall("scalar_mult_vecf", [se1; se2], Vector(Float, Int_Literal(i)))
+        | (Int, Matrix(Int,Int_Literal(i),Int_Literal(j))) -> SCall("scalar_mult_mati", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+        | (Float, Matrix(Int,Int_Literal(i),Int_Literal(j))) | (Int, Matrix(Float,Int_Literal(i),Int_Literal(j))) | (Float, Matrix(Float,Int_Literal(i),Int_Literal(j))) -> SCall("scalar_mult_matf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
         | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
-        )
+
     and get_unop_arithmetic_sexpr se op = 
       let t = get_sexpr_type se in
       match t with
@@ -219,17 +238,27 @@ let check (globals, functions) =
         | _ -> raise (Failure ("can only compare ints/floats with themselves for inequalities"))
 
     and get_unop_cast_sexpr se op = 
-      let t = get_sexpr_type se in
+      let t1 = get_sexpr_type se in
+      let t = match t1 with
+        Int | Float -> t1
+        | Vector(t2,_) -> t2
+        | Matrix(t2,_,_) -> t2
+        | _ -> raise (Failure ("can only cast int/float expressions to int/float expressions"))
+      in
       let op_t = match op with
         IntCast -> Int
         | FloatCast -> Float
         | _ -> raise (Failure ("this is impossible to reach :~)"))
       in
       if t == op_t then se else
-        match t with
+        match t1 with
           Int  -> SUnop(op, se, op_t)
           | Float -> SUnop(op, se, op_t)
-          | _ -> raise (Failure ("can only cast int/float expressions to int/float expressions"))
+          | Vector(Int,se1) -> SCall("vec_int_to_float", [se], Vector(op_t,se1))
+          | Vector(Float,se1) -> SCall("vec_float_to_int", [se], Vector(op_t,se1))
+          | Matrix(Int,se1,se2) -> SCall("mat_int_to_float", [se], Matrix(op_t,se1,se2))
+          | Matrix(Float,se1,se2) -> SCall("mat_float_to_int", [se], Matrix(op_t,se1,se2))
+          | _ -> raise (Failure ("this is impossible to reach :~)"))
 
     and get_equality_type se1 se2 op = 
       let t1 = get_sexpr_type se1 in
@@ -251,8 +280,8 @@ let check (globals, functions) =
       | Vector_Literal(el) -> check_vector_types el
       | Matrix_Literal(ell) -> check_matrix_types ell
       | Id s -> SId(s, type_of_identifier s)
-      | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, expr_to_sexpr e, access_type (type_of_identifier v))
-      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
+      | VecAccess(v, e) -> check_int_expr e; check_vec_access_type v; SVecAccess(v, expr_to_sexpr e, access_type (type_of_identifier v))
+      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; check_mat_access_type v; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
@@ -265,7 +294,18 @@ let check (globals, functions) =
          else
             SCall(fname,List.map2 (fun (ft, _) e -> let se = 
               let e' = expr_to_sexpr e 
-              in if ft == Float && get_sexpr_type e' == Int then SUnop(FloatCast, e', Float) else e'
+              in let et2 = get_sexpr_type e'
+              in match ft with
+                Float -> if get_sexpr_type e' == Int then SUnop(FloatCast, e', Float) else e'
+                | Vector(Float,Int_Literal(i)) -> (match et2 with
+                    Vector(Float,Int_Literal(i)) -> e'
+                  | Vector(Int,Int_Literal(i))   -> SUnop(FloatCast, e', Vector(Float,Int_Literal(i)))
+                  | _                            -> raise (Failure("can only have vector of int/float")))
+                | Matrix(Float,Int_Literal(i),Int_Literal(j)) -> (match et2 with
+                    Matrix(Float,Int_Literal(i),Int_Literal(j)) -> e'
+                  | Matrix(Int,Int_Literal(i),Int_Literal(j)) -> SUnop(FloatCast, e', Matrix(Float,Int_Literal(i),Int_Literal(j)))
+                  | _                            -> raise (Failure("can only have vector of int/float")))
+                | _ -> e'
             in
               let et = get_sexpr_type se in
                 if check_formal_actual_call ft et then se else raise (Failure ("illegal actual argument found " ^
@@ -274,17 +314,29 @@ let check (globals, functions) =
               , fd.typ)
 
     and check_formal_actual_call ft et = match ft with
-      VectorPtr(t1)    -> (match et with
-        Vector(t2,_)   -> t1 == t2
-        | _            -> false)
-      | MatrixPtr(t1)  -> (match et with
-        Matrix(t2,_,_) -> t1 == t2
+      Vector(t1,Int_Literal(i)) -> (match et with
+          Vector(t2,Int_Literal(i)) -> check_formal_actual_call t1 t2
+        | _                       -> false)
+      | Matrix(t1,Int_Literal(i),Int_Literal(j)) -> (match et with
+          Matrix(t2,Int_Literal(i),Int_Literal(j)) -> check_formal_actual_call t1 t2
         | _            -> false)
       | ImagePtr       -> (match et with
-        Image(_,_)     -> true
+          Image(_,_)     -> true
         | _            -> false)
       | Float          -> et == Int
       | _              -> ft == et
+
+    and check_vec_access_type v = 
+      let t = type_of_identifier v
+      in match t with
+        VectorPtr(_) | Vector(_,_) -> ()
+        | _ -> raise(Failure("cannot perform vector access on variable " ^ v))
+
+    and check_mat_access_type v = 
+      let t = type_of_identifier v
+      in match t with
+        MatrixPtr(_) | Matrix(_,_,_) -> ()
+        | _ -> raise(Failure("cannot perform matrix access on variable " ^ v))
 
     (* only gets type of vector; does not go through whole vector all the time *)
     and get_vec_type el = match el with
@@ -335,10 +387,10 @@ let check (globals, functions) =
                   Vector(ty2, Int_Literal(i2)) -> ty1 == ty2 && i1 == i2
                   | _ -> raise (Failure ("cannot compare vectors and matrices")) )
         | Matrix(ty1, Int_Literal(i11), Int_Literal(i12)) -> 
-                        ( match v2 with
-                          Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> 
-                                  ty1 == ty2 && i11 == i21 && i12 == i22
-                          | _ -> raise (Failure ("cannot compare vectors and matrices")) )
+                ( match v2 with
+                  Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> 
+                          ty1 == ty2 && i11 == i21 && i12 == i22
+                  | _ -> raise (Failure ("cannot compare vectors and matrices")) )
         | _ -> raise (Failure ("matrix and vector dimensions must be int literals"))
 
     and get_binop_sexpr e1 e2 op =
@@ -369,7 +421,7 @@ let check (globals, functions) =
       match lt with 
       Vector(_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
         | Matrix(_,_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
-        | _ -> if lt == Float && rt == Int 
+        | _ -> if lt == Float && rt == Int
                then SAssign(se1, SUnop(FloatCast, se2, Float), Float)
                else (if lt == rt then SAssign(se1,se2,lt) 
                        else raise (Failure ("illegal assignment " ^
