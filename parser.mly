@@ -41,7 +41,7 @@ open Ast
 %left LSHIFT RSHIFT
 %right INTCAST FLOATCAST
 %left PLUS MINUS
-%left TIMES DIVIDE MOD DIVINT
+%left TIMES DIVIDE MOD
 %right NOT NEG
 
 %start program
@@ -81,8 +81,9 @@ typ:
   | STRING { String } 
   | VOID { Void } 
   | im_t { $1 }
-/*  | vec_t { $1 } 
-  | mat_t { $1 } */
+  | IMAGE %prec LBRACKET { ImagePtr }
+  | vec_t { $1 } 
+  | mat_t { $1 }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -90,7 +91,7 @@ vdecl_list:
 
 vdecl:
    typ ID SEMI { ($1, $2) }
-   | vec_t { $1 } 
+/*   | vec_t { $1 } 
    | mat_t { $1 } 
  
 
@@ -99,14 +100,14 @@ vec_t:
 
 mat_t: 
   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET ID SEMI { (Matrix($1, $3, $6), $8) }
+*/
 
-/*
 vec_t:
    typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
+
    
 mat_t:
-   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
-*/
+   typ LBRACKET expr RBRACKET LBRACKET expr_opt RBRACKET { Matrix($1, $3, $6) }
 
 im_t:
    IMAGE LBRACKET expr COMMA expr RBRACKET { Image($3, $5) }

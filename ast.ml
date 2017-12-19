@@ -6,8 +6,7 @@
 *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or | Divint | Shiftleft | Shiftright | Bitand | Bitor | Bitxor |
-          Mod
+          And | Or | Shiftleft | Shiftright | Bitand | Bitor | Bitxor | Mod
 
 type uop = Neg | Not | IntCast | FloatCast
 
@@ -29,7 +28,17 @@ type expr =
   | SizeOf of string
   | Noexpr
 
-type typ = Int | Bool | Float | Char | String | Void | Image of expr * expr | Vector of typ * expr | Matrix of typ * expr * expr
+type typ = 
+     Int 
+   | Bool 
+   | Float 
+   | Char 
+   | String 
+   | Void 
+   | Image of expr * expr 
+   | ImagePtr
+   | Vector of typ * expr 
+   | Matrix of typ * expr * expr
 
 type bind = typ * string
 
@@ -68,7 +77,6 @@ let string_of_op = function
   | Geq -> ">="
   | And -> "&&"
   | Or -> "||"
-  | Divint -> "//"
   | Mod -> "%"
   | Shiftleft -> "<<"
   | Shiftright -> ">>"
@@ -86,7 +94,7 @@ let rec string_of_vector el =
   "[" ^ String.concat ", " (List.map (fun e -> string_of_expr e) el) ^ "]"
 
 and(* rec *) string_of_matrix el = "[|" ^
-   String.concat " | " (List.map (fun v -> string_of_vector v) el) ^ "|]"
+   String.concat " & " (List.map (fun v -> string_of_vector v) el) ^ "|]"
 
 and(* rec *) string_of_expr = function
     Int_Literal(i) -> string_of_int i
@@ -133,6 +141,7 @@ let rec string_of_typ = function
   | String -> "string"
   | Void -> "void"
   | Image(h, w) -> "Image[" ^ string_of_expr h ^ "," ^ string_of_expr w ^ "]"
+  | ImagePtr -> "Image"
   | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
   | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
 

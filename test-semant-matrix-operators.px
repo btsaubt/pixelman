@@ -1,0 +1,28 @@
+def int main() { 
+  int[2][2] a; 
+  int b; 
+  int [2][2] c; 
+  float [2][2] d; 
+  float [2][2] e; 
+
+  b = 2;
+
+  :) integer multiplication
+  a = [| [1, 2] & [1, 2] |];
+  a = a * b; 
+
+  :) integer addition and sub
+  c = [| [0, 0] & [0, 0] |]; 
+  a = a - c; 
+  a = a + c; 
+
+  :) float multiplication
+  d = [| [1.0, 2.0] & [1.0, 2.0] |]; 
+  e = [| [0.0, 0.0] & [0.0, 0.0] |]; 
+
+  d = d * e; 
+  d = d - e;
+  d = d + e;
+
+  return 0; 
+} 

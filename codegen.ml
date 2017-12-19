@@ -17,17 +17,17 @@ module StringMap = Map.Make(String)
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "Pixelman"
-  and i32_t   = L.i32_type   context
-  and i8_t    = L.i8_type    context
-  and i1_t    = L.i1_type    context
-  and f_t     = L.double_type context
-  and array_t = L.array_type
-  and void_t  = L.void_type  context in
+  and i32_t    = L.i32_type   context
+  and i8_t     = L.i8_type    context
+  and i1_t     = L.i1_type    context
+  and f_t      = L.double_type context
+  and array_t  = L.array_type
+  and void_t   = L.void_type  context in
 
   let int_lit_to_int = function
     A.Int_Literal(i) -> i | _ -> raise(Failure("Can only make vector/matrix of dimension int literal"))
   in
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> f_t
     | A.Bool -> i1_t
@@ -37,12 +37,13 @@ let translate (globals, functions) =
     | A.Vector(typ, size) -> (match typ with 
                              A.Int -> array_t i32_t (int_lit_to_int size)
                             | A.Float -> array_t f_t (int_lit_to_int size)
-                            | _ -> raise(Failure("Cannot only make vector of type int/float")))
+                            | _ -> raise(Failure("Can only make vector of type int/float")))
     | A.Matrix(t, s1, s2) -> (match t with 
-                             A.Int -> array_t i32_t ((int_lit_to_int s1) * (int_lit_to_int s2))
-                            | A.Float -> array_t f_t ((int_lit_to_int s1) * (int_lit_to_int s2))
+                          A.Int -> array_t (array_t i32_t (int_lit_to_int s1)) (int_lit_to_int s2)
+                            | A.Float -> array_t (array_t f_t (int_lit_to_int s1)) (int_lit_to_int s2)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
-    (* | A.Image(h,w) -> IMPLEMENT IMAGE HERE *)
+    | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w))
+                      in array_t mat_t 3 (* make an array of 3 h x w matrices *)
   in
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -103,10 +104,10 @@ let translate (globals, functions) =
                    with Not_found -> StringMap.find n global_vars
     in
 
-    let rec get_vector_acc_addr s e1 = L.build_gep (lookup s) 
+    let rec get_vector_acc_addr s e1 builder = L.build_gep (lookup s) 
         [| (L.const_int i32_t 0); (expr builder e1) |] s builder
 
-    and get_matrix_acc_addr s e1 e2 = L.build_gep (lookup s) 
+    and get_matrix_acc_addr s e1 e2 builder = L.build_gep (lookup s) 
         [| L.const_int i32_t 0; expr builder e1; expr builder e2 |] s builder
 
     (* Construct code for an expression; return its value *)
@@ -117,12 +118,30 @@ let translate (globals, functions) =
       | S.SString_Literal s -> L.build_global_stringptr s "s" builder
       | S.SBool_Literal b -> L.const_int i1_t (if b then 1 else 0)
       | S.SVector_Literal (l, t) -> L.const_array (ltype_of_typ t) (Array.of_list (List.map (expr builder) l))
+      | S.SMatrix_Literal (ell, t) -> (match t with 
+            A.Matrix(A.Float,_,_) -> 
+              let order = List.map List.rev ell in 
+              let f_lists = List.map (List.map (expr builder)) order in
+              let array_list = List.map Array.of_list f_lists in 
+              let f_list_list = List.rev (List.map (L.const_array f_t) array_list) in
+              let array_of_arrays = Array.of_list f_list_list in 
+                L.const_array(array_t f_t (List.length (List.hd ell))) array_of_arrays 
+          | A.Matrix(A.Int,_,_) -> 
+            let order = List.map List.rev ell in 
+            let i_lists = List.map (List.map (expr builder)) order in 
+            let array_list = List.map Array.of_list i_lists in
+            let i_list_array = List.rev (List.map (L.const_array i32_t) array_list) in 
+            let array_of_arrays = Array.of_list i_list_array in 
+              L.const_array(array_t i32_t (List.length (List.hd ell))) array_of_arrays 
+          | _ -> raise(Failure(A.string_of_typ t)) 
+        )
+
       | S.SNoexpr -> L.const_int i32_t 0
       | S.SId (s, _) -> L.build_load (lookup s) s builder
-      | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e) s builder
-      | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2) s builder
       | S.SSizeOf(vm,_) -> L.const_int i32_t (L.array_length (L.element_type (L.type_of (lookup vm))))
-      | S.SBinop (e1, op, e2, t) ->
+      | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e builder) s builder
+      | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2 builder) s builder
+      | S.SBinop (e1, op, e2, _) -> (* too late to implement using sexpr types to make things easier *)
 	  let e1' = expr builder e1
 	  and e2' = expr builder e2 in
 	  (match op with
@@ -186,14 +205,16 @@ let translate (globals, functions) =
                            | "i32"   -> L.build_icmp L.Icmp.Sge
                            | _ -> raise(Failure("Illegal type operation" )) )) 
 	  ) e1' e2' "tmp" builder
-      | S.SUnop(op, e, _) -> let e' = expr builder e in
+      | S.SUnop(op, e, t) -> let e' = expr builder e in
 	    (match op with
-	        A.Neg       -> L.build_neg
-          | A.Not     -> L.build_not) e' "tmp" builder
+	        A.Neg         -> (if t == A.Float then L.build_fneg else L.build_neg) e' "tmp" builder
+          | A.Not       -> L.build_not e' "tmp" builder
+          | A.IntCast   -> L.build_fptosi e' i32_t "float_to_int" builder
+          | A.FloatCast -> L.build_sitofp e' f_t   "int_to_float" builder )
       | S.SAssign (v, e, _) -> let lsb = (match v with
                                  S.SId(n,_) -> lookup n
-                                 | S.SVecAccess(s,e,_) -> get_vector_acc_addr s e
-                                 | S.SMatAccess(s,e1,e2,_) -> get_matrix_acc_addr s e1 e2
+                                 | S.SVecAccess(s,e,_) -> get_vector_acc_addr s e builder
+                                 | S.SMatAccess(s,e1,e2,_) -> get_matrix_acc_addr s e1 e2 builder
                                  | _ -> raise(Failure("Illegal assignment lvalue")))
                                in
                                let rsb = expr builder e in
@@ -211,8 +232,8 @@ let translate (globals, functions) =
 	        L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | S.SCall (f, act, _) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-	 let result = (match fdecl.S.styp with A.Void -> ""
+	  let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+	  let result = (match fdecl.S.styp with A.Void -> ""
                                             | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list actuals) result builder
     in

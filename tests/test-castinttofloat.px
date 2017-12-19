@@ -2,6 +2,6 @@ def int main(){
 	int a;
 	float b;
 	a = 5;
-	b = float(a);
+	b = $float 5;
 	print_float(b);
 }

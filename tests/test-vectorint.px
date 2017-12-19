@@ -2,7 +2,7 @@ def int main(){
 	int[5] v1;
 	int i;
 	v1 = [1,2,3,4,5];
-	for(i = 0;i<5;i=i+1){
+	for(i=0;i<5;i=i+1){
 		print_int(v1[i]);
 	}
 }
