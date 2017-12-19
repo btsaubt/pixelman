@@ -103,6 +103,12 @@ let check (globals, functions) =
       | _ -> raise (Failure ("illegal matrix/vector access"))
     in
 
+    let is_vec_matrix vm = match (type_of_identifier vm) with
+        Vector(_,e) -> e
+      | Matrix(_,e1,e2) -> e1
+      | _ -> raise (Failure ("cannot get size of non-vector/non-matrix type"))
+    in
+
     let get_sexpr_type se = match se with
         SInt_Literal(_) -> Int
         | SFloat_Literal(_) -> Float
@@ -118,6 +124,7 @@ let check (globals, functions) =
         | SVecAccess(_,_,t) -> t
         | SMatAccess(_,_,_,t) -> t
         | SCall(_,_,t) -> t
+        | SSizeOf(_,t) -> t
         | SNoexpr -> Void
     in
 
@@ -200,7 +207,11 @@ let check (globals, functions) =
       | Matrix_Literal(ell) -> check_matrix_types ell
       | Id s -> SId(s, type_of_identifier s)
       | VecAccess(v, e) -> check_int_expr e; SVecAccess(v, expr_to_sexpr e, access_type (type_of_identifier v))
-      | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
+      | MatAccess(v, e1, e2) ->  
+              check_int_expr e1; 
+              check_int_expr e2; 
+              SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
+      | SizeOf(vm) -> SSizeOf(vm, type_of_identifier vm)
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
@@ -216,6 +227,7 @@ let check (globals, functions) =
                 string_of_typ ft ^ " expected " ^ string_of_typ et ^ " in " ^
                 string_of_expr e))) fd.formals actuals
             ,fd.typ)
+
 
     (* only gets type of vector; does not go through whole vector all the time *)
     and get_vec_type el = match el with

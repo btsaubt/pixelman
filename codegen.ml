@@ -121,6 +121,7 @@ let translate (globals, functions) =
       | S.SId (s, _) -> L.build_load (lookup s) s builder
       | S.SVecAccess(s, e, _) -> L.build_load (get_vector_acc_addr s e) s builder
       | S.SMatAccess(s, e1, e2, _) -> L.build_load (get_matrix_acc_addr s e1 e2) s builder
+      | S.SSizeOf(vm,tm) -> L.array_length (lookup vm) ?????
       | S.SBinop (e1, op, e2, t) ->
 	  let e1' = expr builder e1
 	  and e2' = expr builder e2 in

@@ -26,6 +26,7 @@ type expr =
   | Call of string * expr list
   | VecAccess of string * expr
   | MatAccess of string * expr * expr
+  | SizeOf of string
   | Noexpr
 
 type typ = Int | Bool | Float | Char | String | Void | Image of expr * expr | Vector of typ * expr | Matrix of typ * expr * expr

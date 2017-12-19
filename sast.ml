@@ -23,6 +23,7 @@ type sexpr =
   | SVecAccess of string * sexpr * typ
   | SMatAccess of string * sexpr * sexpr * typ
   | SCall of string * sexpr list * typ
+  | SSizeOf of string * typ
   | SNoexpr
 
 (* sstatements *)
