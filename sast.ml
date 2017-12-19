@@ -22,6 +22,8 @@ type sexpr =
   | SAssign of sexpr * sexpr * typ
   | SVecAccess of string * sexpr * typ
   | SMatAccess of string * sexpr * sexpr * typ
+  | SMatRow of string * sexpr * typ
+  | SMatCol of string * sexpr * typ
   | SCall of string * sexpr list * typ
   | SSizeOf of string * typ
   | SNoexpr

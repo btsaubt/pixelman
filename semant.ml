@@ -103,9 +103,9 @@ let check (globals, functions) =
       | _ -> raise (Failure ("illegal matrix/vector access"))
     in
 
-    let is_vec_matrix vm = match (type_of_identifier vm) with
-        Vector(_,e) -> e
-      | Matrix(_,e1,e2) -> e1
+    let is_vec_matrix t = match t with
+        Vector(_,_) -> ()
+      | Matrix(_,_,_) -> ()
       | _ -> raise (Failure ("cannot get size of non-vector/non-matrix type"))
     in
 
@@ -273,7 +273,7 @@ let check (globals, functions) =
       | Vector_Literal(el) -> check_vector_types el
       | Matrix_Literal(ell) -> check_matrix_types ell
       | Id s -> SId(s, type_of_identifier s)
-      | SizeOf(vm) -> SSizeOf(vm, Int)
+      | SizeOf(s) -> is_vec_matrix (type_of_identifier s); SSizeOf(s, Int)
       | VecAccess(v, e) -> check_int_expr e; check_vec_access_type v; SVecAccess(v, expr_to_sexpr e, access_type (type_of_identifier v))
       | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; check_mat_access_type v; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op

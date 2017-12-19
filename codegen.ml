@@ -87,18 +87,18 @@ let translate (globals, functions) =
        value, if appropriate, and remember their values in the "locals" map *)
     let local_vars =
       let add_formal m (t, n) p = L.set_value_name n p;
-    	let local = L.build_alloca (ltype_of_typ t) n builder in
-    	ignore (L.build_store p local builder);
-    	StringMap.add n local m
-    in
+        let local = L.build_alloca (ltype_of_typ t) n builder in
+      	ignore (L.build_store p local builder);
+      	StringMap.add n local m
+      in
 
-    let add_local m (t, n) =
-	    let local_var = L.build_alloca (ltype_of_typ t) n builder
-	    in StringMap.add n local_var m 
-    in
-    let formals = List.fold_left2 add_formal StringMap.empty fdecl.S.sformals
-          (Array.to_list (L.params the_function)) 
-    in
+      let add_local m (t, n) =
+  	    let local_var = L.build_alloca (ltype_of_typ t) n builder
+  	    in StringMap.add n local_var m 
+      in
+      let formals = List.fold_left2 add_formal StringMap.empty fdecl.S.sformals
+            (Array.to_list (L.params the_function)) 
+      in
       List.fold_left add_local formals fdecl.S.slocals 
     in
 
@@ -234,8 +234,12 @@ let translate (globals, functions) =
       | S.SCall ("printbig", [e], _) ->
 	        L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | S.SCall (f, act, _) ->
-         let (fdef, fdecl) = StringMap.find f function_decls in
-
+        let (fdef, fdecl) = StringMap.find f function_decls in
+           let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+           let result = (match fdecl.S.styp with A.Void -> ""
+                                               | _      -> f ^ "_result" ) in
+           L.build_call fdef (Array.of_list actuals) result builder
+        in
     (* Invoke "f builder" if the current block doesn't already
        have a terminal (e.g., a branch). *)
     let add_terminal builder f =

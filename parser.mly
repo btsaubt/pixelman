@@ -164,6 +164,8 @@ expr:
   | LPAREN expr RPAREN { $2 }
   | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
   | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
+  | ID LBRACKET expr RBRACKET LBRACKET RBRACKET {  }
+  | ID LBRACKET RBRACKET expr RBRACKET {}
 
 
 primitive_literals:
