@@ -295,7 +295,7 @@ let check (globals, functions) =
             in
               let et = get_sexpr_type se in
                 if check_formal_actual_call ft et then se else raise (Failure ("illegal actual argument found " ^
-                  string_of_typ ft ^ " expected " ^ string_of_typ et ^ " in " ^
+                  string_of_typ et ^ " expected " ^ string_of_typ ft ^ " in " ^
                   string_of_expr e))) fd.formals actuals
               , fd.typ)
 
@@ -303,11 +303,8 @@ let check (globals, functions) =
       Vector(t1,_) -> (match et with
           Vector(t2,Int_Literal(i)) -> check_formal_actual_call t1 t2
         | _                       -> false)
-      | Matrix(t1,Int_Literal(i),Int_Literal(j)) -> (match et with
+      | Matrix(t1,_,_) -> (match et with
           Matrix(t2,Int_Literal(i),Int_Literal(j)) -> check_formal_actual_call t1 t2
-        | _            -> false)
-      | ImagePtr       -> (match et with
-          Image(_,_)     -> true
         | _            -> false)
       | Float          -> et == Int || et == Float
       | _              -> ft == et
@@ -315,13 +312,13 @@ let check (globals, functions) =
     and check_vec_access_type v = 
       let t = type_of_identifier v
       in match t with
-        VectorPtr(_) | Vector(_,_) -> ()
+        Vector(_,_) -> ()
         | _ -> raise(Failure("cannot perform vector access on variable " ^ v))
 
     and check_mat_access_type v = 
       let t = type_of_identifier v
       in match t with
-        MatrixPtr(_) | Matrix(_,_,_) -> ()
+        Matrix(_,_,_) -> ()
         | _ -> raise(Failure("cannot perform matrix access on variable " ^ v))
 
     (* only gets type of vector; does not go through whole vector all the time *)

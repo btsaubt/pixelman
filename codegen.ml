@@ -22,7 +22,6 @@ let translate (globals, functions) =
   and i1_t     = L.i1_type    context
   and f_t      = L.double_type context
   and array_t  = L.array_type
-  and ptr_t    = L.pointer_type
   and void_t   = L.void_type  context in
 
   let int_lit_to_int = function
@@ -45,16 +44,6 @@ let translate (globals, functions) =
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
     | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w))
                       in array_t mat_t 3 (* make an array of 3 h x w matrices *)
-    (* | A.ImagePtr ->     print_string "imgptr"; ptr_t i32_t
-    | A.VectorPtr(t) -> print_string "vecptr"; (match t with
-                          A.Int   -> ptr_t i32_t
-                          | A.Float -> ptr_t f_t
-                          | _ -> raise(Failure("Can only make vector of type int/float")))
-    | A.MatrixPtr(t) -> print_string "matptr"; (match t with
-                          A.Int   -> ptr_t i32_t
-                          | A.Float -> ptr_t f_t
-                          | _ -> raise(Failure("Can only make vector of type int/float"))) *)
-    (* | _ -> raise(Failure("can only instantiate pointer types in function formals")) USED ONLY IF WE ALLOW pointers only in formals *)
   in
   (* Declare each global variable; remember its value in a map *)
   let global_vars =

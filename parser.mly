@@ -83,9 +83,7 @@ typ:
   | im_t { $1 }
   | IMAGE %prec LBRACKET { ImagePtr }
   | vec_t { $1 } 
-  | vecp_t { $1 }
   | mat_t { $1 }
-  | matp_t { $1 }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -107,14 +105,9 @@ mat_t:
 vec_t:
    typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
 
-vecp_t:
-   typ LBRACKET RBRACKET %prec NOVECLBRACKET { VectorPtr($1) }
    
 mat_t:
    typ LBRACKET expr RBRACKET LBRACKET expr_opt RBRACKET { Matrix($1, $3, $6) }
-
-matp_t:
-   typ LBRACKET RBRACKET LBRACKET RBRACKET { MatrixPtr($1) }
 
 im_t:
    IMAGE LBRACKET expr COMMA expr RBRACKET { Image($3, $5) }
