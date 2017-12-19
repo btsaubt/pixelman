@@ -35,7 +35,6 @@ type typ =
    | String 
    | Void 
    | Image of expr * expr 
-   | ImagePtr
    | Vector of typ * expr 
    | Matrix of typ * expr * expr
 
@@ -139,7 +138,6 @@ let rec string_of_typ = function
   | String -> "string"
   | Void -> "void"
   | Image(h, w) -> "Image[" ^ string_of_expr h ^ "," ^ string_of_expr w ^ "]"
-  | ImagePtr -> "Image"
   | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
   | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
 

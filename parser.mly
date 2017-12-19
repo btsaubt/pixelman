@@ -81,7 +81,6 @@ typ:
   | STRING { String } 
   | VOID { Void } 
   | im_t { $1 }
-  | IMAGE %prec LBRACKET { ImagePtr }
   | vec_t { $1 } 
   | mat_t { $1 }
 

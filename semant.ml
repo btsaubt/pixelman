@@ -301,10 +301,10 @@ let check (globals, functions) =
 
     and check_formal_actual_call ft et = match ft with
       Vector(t1,_) -> (match et with
-          Vector(t2,Int_Literal(i)) -> check_formal_actual_call t1 t2
+          Vector(t2,_) -> check_formal_actual_call t1 t2
         | _                       -> false)
       | Matrix(t1,_,_) -> (match et with
-          Matrix(t2,Int_Literal(i),Int_Literal(j)) -> check_formal_actual_call t1 t2
+          Matrix(t2,_,_) -> check_formal_actual_call t1 t2
         | _            -> false)
       | Float          -> et == Int || et == Float
       | _              -> ft == et
@@ -365,13 +365,13 @@ let check (globals, functions) =
         
     and compare_vector_matrix_type v1 v2 = 
       match v1 with
-        | Vector(ty1, Int_Literal(i1)) -> 
+        | Vector(ty1, _) -> 
                 ( match v2 with
-                  Vector(ty2, Int_Literal(i2)) -> ty1 == ty2 || ((ty1 == Float) && (ty2 == Int))
+                  Vector(ty2, _) -> ty1 == ty2 || ((ty1 == Float) && (ty2 == Int))
                   | _ -> raise (Failure ("cannot compare vectors and matrices")) )
-        | Matrix(ty1, Int_Literal(i11), Int_Literal(i12)) -> 
+        | Matrix(ty1, _, _) -> 
                 ( match v2 with
-                  Matrix(ty2, Int_Literal(i21), Int_Literal(i22)) -> 
+                  Matrix(ty2, _, _) -> 
                           ty1 == ty2 || ((ty1 == Float) && (ty2 == Int))
                   | _ -> raise (Failure ("cannot compare vectors and matrices")) )
         | _ -> raise (Failure ("matrix and vector dimensions must be int literals"))
@@ -460,7 +460,6 @@ let check (globals, functions) =
         then raise(Failure("can only have vectors/matrices of ints/floats"))
         else (); (t, id)
       | Image(h,w) -> check_int_literal_expr h; check_int_literal_expr w; (t, id)
-      | _ -> raise(Failure("invalid variable declaration type"))
     in
 
     { 
