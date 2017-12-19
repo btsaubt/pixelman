@@ -148,10 +148,10 @@ let check (globals, functions) =
                   | Int -> if tm1 == Float 
                     then SCall("scalar_mult_veci", [se2; se1], Vector(Float, Int_Literal(i)))
                     else SCall("scalar_mult_vecf", [se2; se1], Vector(Int, Int_Literal(i)))
-                  | Vector(tm2, Int_Literal(i2)) -> if tm2 == Float || tm1 == Float 
+                  | Vector(tm2, _) -> if tm2 == Float || tm1 == Float 
                       then SCall("vec_dot_productf", [se2; se1], Float)
                       else SCall("vec_dot_producti", [se2; se1], Int)
-                  | Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if tm2 == Float || tm1 == Float 
+                  | Matrix(tm2, _, Int_Literal(j2)) -> if tm2 == Float || tm1 == Float 
                           then SCall("vec_mat_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j2)))
                           else SCall("vec_mat_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j2)))
                   | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
@@ -173,10 +173,10 @@ let check (globals, functions) =
                       | Int -> if tm1 == Float 
                         then SCall("scalar_mult_matf", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
                         else SCall("scalar_mult_mati", [se2; se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
-                      | Vector(tm2, Int_Literal(i2))  -> if tm2 == Float || tm1 == Float  
+                      | Vector(tm2, _)  -> if tm2 == Float || tm1 == Float  
                           then SCall("mat_vec_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(1)))
                           else SCall("mat_vec_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(1)))
-                      | Matrix(tm2, Int_Literal(i2), Int_Literal(j2)) -> if tm2 == Float || tm1 == Float 
+                      | Matrix(tm2, _, Int_Literal(j2)) -> if tm2 == Float || tm1 == Float 
                           then SCall("mat_mat_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j2)))
                           else SCall("mat_mat_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j2)))
                       | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices")))
@@ -283,12 +283,12 @@ let check (globals, functions) =
               in let et2 = get_sexpr_type e'
               in match ft with
                 Float -> if get_sexpr_type e' == Int then SUnop(FloatCast, e', Float) else e'
-                | Vector(Float,Int_Literal(i)) -> (match et2 with
-                    Vector(Float,Int_Literal(i)) -> e'
+                | Vector(Float,_) -> (match et2 with
+                    Vector(Float,_) -> e'
                   | Vector(Int,Int_Literal(i))   -> SUnop(FloatCast, e', Vector(Float,Int_Literal(i)))
                   | _                            -> raise (Failure("can only have vector of int/float")))
-                | Matrix(Float,Int_Literal(i),Int_Literal(j)) -> (match et2 with
-                    Matrix(Float,Int_Literal(i),Int_Literal(j)) -> e'
+                | Matrix(Float,_,_) -> (match et2 with
+                    Matrix(Float,_,_) -> e'
                   | Matrix(Int,Int_Literal(i),Int_Literal(j)) -> SUnop(FloatCast, e', Matrix(Float,Int_Literal(i),Int_Literal(j)))
                   | _                            -> raise (Failure("can only have vector of int/float")))
                 | _ -> e'
@@ -300,7 +300,7 @@ let check (globals, functions) =
               , fd.typ)
 
     and check_formal_actual_call ft et = match ft with
-      Vector(t1,Int_Literal(i)) -> (match et with
+      Vector(t1,_) -> (match et with
           Vector(t2,Int_Literal(i)) -> check_formal_actual_call t1 t2
         | _                       -> false)
       | Matrix(t1,Int_Literal(i),Int_Literal(j)) -> (match et with
