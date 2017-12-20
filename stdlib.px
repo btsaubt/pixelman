@@ -160,7 +160,7 @@ def int[3][3] mat_mat_addi(int[3][3] a, int[3][3] b) {
   int j;
   int[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] + b[i][j];
     }
   }
@@ -172,7 +172,7 @@ def float[3][3] mat_mat_addf(float[3][3] a, float[3][3] b) {
   int j;
   float[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] + b[i][j];
     }
   }
@@ -202,7 +202,7 @@ def int[3][3] mat_mat_subi(int[3][3] a, int[3][3] b) {
   int j;
   int[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] - b[i][j];
     }
   }
@@ -214,7 +214,7 @@ def float[3][3] mat_mat_subf(float[3][3] a, float[3][3] b) {
   int j;
   float[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] - b[i][j];
     }
   }
@@ -226,7 +226,7 @@ def int[3] vec_mat_multi(int[3] a, int[3][3] b) {
   int j;
   int[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[j] * b[j][i];
     }
   }
@@ -238,7 +238,7 @@ def float[3] vec_mat_multf(float[3] a, float[3][3] b) {
   int j;
   float[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[j] * b[j][i];
     }
   }
@@ -250,7 +250,7 @@ def int[3] mat_vec_multi(int[3][3] a, int[3] b) {
   int j;
   int[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[i][j] * b[j];
     }
   }
@@ -262,7 +262,7 @@ def float[3] mat_vec_multf(float[3][3] a, float[3] b) {
   int j;
   float[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[i][j] * b[j];
     }
   }
@@ -286,7 +286,7 @@ def float[3][3] mat_mat_multf(float[3][3] a, float[3][3] b) {
   int j;
   float[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
     }
   }
@@ -298,7 +298,7 @@ def int[3][3] mat_transposei(int[3][3] a) {
 	int j;
 	int[3][3] b;
 	for(i = 0; i < 3; i = i+1) {
-	    for(j = 0; j < 3; j = j+2) {
+	    for(j = 0; j < 3; j = j+1) {
 	    	b[j][i] = a[i][j];
 	    }
 	}
@@ -310,7 +310,7 @@ def float[3][3] mat_transposef(float[3][3] a) {
 	int j;
 	float[3][3] b;
 	for(i = 0; i < 3; i = i+1) {
-	    for(j = 0; j < 3; j = j+2) {
+	    for(j = 0; j < 3; j = j+1) {
 	    	b[j][i] = a[i][j];
 	    }
 	}

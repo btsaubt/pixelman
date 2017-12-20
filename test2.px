@@ -18,10 +18,10 @@ def int main () {
         & [7,8,9]|];
 
     b = [|[2,0,0] 
-        & [0,1,0] 
-        & [0,0,2]|];
+        & [1,0,0] 
+        & [1,0,0]|];
 
-    f = mat_inverse3(b);
+    f = mat_transposef(b);
 
     for(i = 0; i < 3; i = i + 1) {
     	for(j = 0; j < 3; j = j + 1) {
