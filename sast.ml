@@ -22,7 +22,9 @@ type sexpr =
   | SAssign of sexpr * sexpr * typ
   | SVecAccess of string * sexpr * typ
   | SMatAccess of string * sexpr * sexpr * typ
+  | SImAccess of string * int * typ
   | SCall of string * sexpr list * typ
+  | SSizeOf of string * typ
   | SNoexpr
 
 (* sstatements *)

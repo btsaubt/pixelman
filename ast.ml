@@ -25,6 +25,10 @@ type expr =
   | Call of string * expr list
   | VecAccess of string * expr
   | MatAccess of string * expr * expr
+  | MatRow of string * expr
+  | MatCol of string * expr
+  | SizeOf of string
+  | ImAccess of string * int
   | Noexpr
 
 type typ = 
@@ -35,11 +39,8 @@ type typ =
    | String 
    | Void 
    | Image of expr * expr 
-   | ImagePtr
    | Vector of typ * expr 
    | Matrix of typ * expr * expr
-   | MatrixPtr of typ
-   | VectorPtr of typ
 
 type bind = typ * string
 
@@ -111,11 +112,15 @@ and(* rec *) string_of_expr = function
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1  ^ " = " ^ string_of_expr e2
 (*   | Assign(v, e2) -> v ^ " = " ^ string_of_expr e2 *)
+  | SizeOf(s) -> "sizeof(" ^ s ^ ")"
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
   | MatAccess(v, e1, e2) -> v ^ "[" ^ string_of_expr e1 ^ "]" ^ 
                                 "[" ^ string_of_expr e2 ^ "]"
+  | MatRow(v, e) -> v ^ "[" ^ string_of_expr e ^ "][]"
+  | MatCol(v, e) -> v ^ "[][" ^ string_of_expr e ^ "]"
+  | ImAccess(v, c) -> v ^ ".[" ^ string_of_int c ^ "]"
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -141,11 +146,8 @@ let rec string_of_typ = function
   | String -> "string"
   | Void -> "void"
   | Image(h, w) -> "Image[" ^ string_of_expr h ^ "," ^ string_of_expr w ^ "]"
-  | ImagePtr -> "Image"
   | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
   | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
-  | MatrixPtr(t) -> string_of_typ t ^ "[][]"
-  | VectorPtr(t) -> string_of_typ t ^ "[]"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

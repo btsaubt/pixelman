@@ -9,11 +9,11 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON 
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA COLON DOT
 %token LMATBRACK RMATBRACK
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT INTCAST FLOATCAST
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR IMAGE
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR IMAGE SIZEOF
 
 %token NOVECLBRACKET
 %token BREAK CONTINUE
@@ -30,6 +30,7 @@ open Ast
 %nonassoc NOVECLBRACKET
 %nonassoc LMATBRACK
 %nonassoc LBRACKET
+%nonassoc DOT
 %right ASSIGN
 %left OR
 %left AND
@@ -81,11 +82,8 @@ typ:
   | STRING { String } 
   | VOID { Void } 
   | im_t { $1 }
-  | IMAGE %prec LBRACKET { ImagePtr }
   | vec_t { $1 } 
-  | vecp_t { $1 }
   | mat_t { $1 }
-  | matp_t { $1 }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -93,31 +91,15 @@ vdecl_list:
 
 vdecl:
    typ ID SEMI { ($1, $2) }
-/*   | vec_t { $1 } 
-   | mat_t { $1 } 
- 
-
-vec_t: 
-  typ LBRACKET expr RBRACKET ID SEMI { (Vector($1, $3), $5) }  
-
-mat_t: 
-  typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET ID SEMI { (Matrix($1, $3, $6), $8) }
-*/
 
 vec_t:
    typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
 
-vecp_t:
-   typ LBRACKET RBRACKET %prec NOVECLBRACKET { VectorPtr($1) }
-   
 mat_t:
-   typ LBRACKET expr RBRACKET LBRACKET expr_opt RBRACKET { Matrix($1, $3, $6) }
-
-matp_t:
-   typ LBRACKET RBRACKET LBRACKET RBRACKET { MatrixPtr($1) }
+   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
 
 im_t:
-   IMAGE LBRACKET expr COMMA expr RBRACKET { Image($3, $5) }
+   IMAGE LBRACKET expr COMMA expr RBRACKET %prec NOVECLBRACKET { Image($3, $5) }
 
 
 stmt_list:
@@ -167,10 +149,14 @@ expr:
   | INTCAST expr    { Unop(IntCast, $2) }
   | FLOATCAST expr  { Unop(FloatCast, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
+  | SIZEOF LPAREN ID RPAREN  { SizeOf($3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
   | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
+  | ID LBRACKET expr RBRACKET LBRACKET RBRACKET { MatRow($1, $3) }
+  | ID LBRACKET RBRACKET LBRACKET expr RBRACKET { MatCol($1, $5) }
+  | ID DOT LBRACKET INT_LITERAL RBRACKET { ImAccess($1, $4) }
 
 
 primitive_literals:

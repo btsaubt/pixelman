@@ -1,0 +1,8 @@
+def int main(){
+    int[3] a;
+    int[3] b;
+    a = [1,2,3];
+    b = [1,1,1];
+    a = a + b;
+    return 0;
+}
