@@ -1,6 +1,7 @@
 #include <stdio.h>
- 
-void inputPic(int wedfwe)
+#define new_min(x,y) ((x) <= (y)) ? (x) : (y)
+
+void inputPic(int effect)
 {
   int pix_x=300,pix_y=300;    // image dimns in pixels
   static int image[300][300][4]; // first [] number here is total pixels of each color in
@@ -26,6 +27,7 @@ void inputPic(int wedfwe)
       image[k][j][0] = fgetc(streamIn);
     }
   }
+  if(effect==1){
   int temp;
   for(k=0;k<pix_y;k++) {
     for(j=0;j<pix_x;j++) {
@@ -35,7 +37,23 @@ void inputPic(int wedfwe)
       image[k][j][0] = temp;
     }
   }
-  FILE *fp = fopen("blackandwhite.ppm", "wb"); /* b - binary mode */
+  }
+  if(effect==2){
+  float tempR;
+  float tempG;
+  float tempB;
+  for(k=0;k<pix_y;k++) {
+    for(j=0;j<pix_x;j++) {
+      tempR = image[k][j][2]*.189 + image[k][j][1]*.769 + image[k][j][0]*.393;
+      tempG = image[k][j][2]*.168 + image[k][j][1]*.686 + image[k][j][0]*.349;
+      tempB = image[k][j][2]*.131 + image[k][j][1]*.534 + image[k][j][0]*.272;
+      image[k][j][2] = new_min((int) tempB, 255); 
+      image[k][j][1] = new_min((int) tempG, 255);
+      image[k][j][0] = new_min((int) tempR, 255);
+    }
+  }
+  }
+  FILE *fp = fopen("outimage.ppm", "wb"); /* b - binary mode */
   (void) fprintf(fp, "P6\n%d %d\n255\n", pix_x, pix_y);
   for(k=0;k<pix_y;k++) {
     for(j=0;j<pix_x;j++) {
