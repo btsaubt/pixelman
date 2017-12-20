@@ -153,8 +153,8 @@ let check (globals, functions) =
               Mult -> (match ta2 with 
                   Float -> SCall("scalar_mult_vecf", [se2; se1], Vector(Float, Int_Literal(i)))
                   | Int -> if tm1 == Float 
-                    then SCall("scalar_mult_veci", [se2; se1], Vector(Float, Int_Literal(i)))
-                    else SCall("scalar_mult_vecf", [se2; se1], Vector(Int, Int_Literal(i)))
+                    then SCall("scalar_mult_vecf", [se2; se1], Vector(Float, Int_Literal(i)))
+                    else SCall("scalar_mult_veci", [se2; se1], Vector(Int, Int_Literal(i)))
                   | Vector(tm2, _) -> if tm2 == Float || tm1 == Float 
                       then SCall("vec_dot_productf", [se2; se1], Float)
                       else SCall("vec_dot_producti", [se2; se1], Int)

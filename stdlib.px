@@ -6,3 +6,146 @@ def void printb(bool b){
         print_string("False");
     }
 }
+
+def float[3][3] mat_int_to_float(int[3][3] a) { 
+  int i;
+  int j; 
+  float[3][3] b; 
+
+  for(i = 0; i < 3; i = i+1) { 
+    for(j = 0; j < 3; j = j+1) { 
+      b[i][j] = $float a[i][j]; 
+    } 
+  }
+
+  return b; 
+} 
+ 
+def int[3][3] mat_float_to_int(float[3][3] a) { 
+  int i;
+  int j; 
+
+  int[3][3] b; 
+
+  for(i = 0; i < 3; i = i+1) { 
+    for(j = 0; j < 3; j = j+1) { 
+      b[i][j] = $int a[i][j]; 
+    }
+  }
+
+  return b; 
+}
+ 
+
+def float[3] vec_int_to_float(int[3] a) { 
+  int i;
+  float[3] b; 
+
+  for(i = 0; i < 3; i = i+1) { 
+    b[i] = $float a[i]; 
+  } 
+
+  return b; 
+} 
+
+def int[3] vec_float_to_int(float[3] a) { 
+  int i; 
+  int[3] b; 
+
+  for(i = 0; i < 3; i = i+1) { 
+    b[i] = $int a[i]; 
+  } 
+
+  return b; 
+} 
+ 
+def int[3] scalar_mult_veci(int a, int[3] b) {
+  int i;
+  for(i = 0; i < 3; i = i+1) {
+    b[i] = b[i] * a;
+  }
+
+  return b;
+}
+
+def float[3] scalar_mult_vecf(float a, float[3] b) {
+  int i;
+  for(i = 0; i < 3; i = i+1) {
+    b[i] = b[i] * a;
+    print_float(b[i]);
+  }
+
+  return b;
+}
+
+def int[3][3] scalar_mult_mati(int a, int[3][3] b) {
+  int i;
+  int j;
+
+  for(i = 0; i < 3; i = i+1) {
+    for(j = 0; j < 3; j = j+1) {
+      b[i][j] = b[i][j] * a;
+    }
+  }
+  return b;
+}
+
+def float[3][3] scalar_mult_matf(float a, float[3][3] b) {
+  int i;
+  int j;
+
+  for(i = 0; i < 3; i = i+1) {
+    for(j = 0; j < 3; j = j+1) {
+      b[i][j] = b[i][j] * a;
+    }
+  }
+  return b;
+}
+
+def int vec_dot_producti(int[3] a, int[3] b) {
+  int sum;
+  int i;
+  sum = 0;
+  i = 0;
+
+  for(i = 0; i < 3; i=i+1) {
+    sum = sum + (a[i] * b[i]);
+  }
+
+  return sum;
+}
+
+def float vec_dot_productf(float[3] a, float[3] b) {
+  float sum;
+  int i;
+  sum = 0.0;
+  i = 0;
+
+  for(i = 0; i < 3; i=i+1) {
+    sum = sum + (a[i] * b[i]);
+  }
+
+  return sum;
+}
+
+def int[3] vec_vec_addi(int[3] a, int[3] b) {
+  int i;
+
+  for(i = 0; i < 3; i = i+1) {
+    a[i] = a[i] + b[i];
+  }
+  return a;
+}
+
+def int[3][3] mat_mat_add(int[3][3] a, int[3][3] b) {
+  int i;
+  int j;
+  for(i = 0; i < 3; i = i+1) {
+    for(j = 0; j < 3; j = j+2) {
+      a[i][j] = a[i][j] + b[i][j];
+    }
+  }
+  return a;
+}
+
+
