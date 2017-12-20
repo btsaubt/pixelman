@@ -1,0 +1,43 @@
+def int main(){
+    int[10] a;
+    int[3] c;
+    int i;
+    int start;
+    int end;
+    int temp;
+    print_string("a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]");
+    a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    print_arr(a);
+    start = 0;
+    end = sizeof(a) - 1;
+    while (start < end && start!= end){
+        temp = a[start];
+        a[start] = a[end];
+        a[end] = temp;
+        start = start+1;
+        end = end-1;
+    }
+    print_string("a reversed: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]");
+    print_arr(a);
+    print_string("c = [2, 5, 8]");
+    c = [ 2, 5, 8 ];
+    print_arr2(c);
+    c = c*3;
+    print_string("c = c*3 = [6, 15, 24]");
+    print_arr2(c);
+    return 0;
+}
+
+def void print_arr(int[10] arr){
+    int j;
+    for (j=0; j<sizeof(arr); j = j+1){
+        print_int(arr[j]);
+    }
+}
+
+def void print_arr2(int[3] arr){
+    int k;
+    for (k=0; k<sizeof(arr); k = k+1){
+        print_int(arr[k]);
+    }
+}

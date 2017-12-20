@@ -99,7 +99,31 @@ def float[3] scalar_mult_vecf(float a, float[3] b) {
   return c;
 }
 
-def int[3][3] scalar_mult_mati(int a, int[3][3] b) {
+def int[2][2] scalar_mult_mat2i(int a, int[2][2] b) {
+  int i;
+  int j;
+  int[2][2] c;
+  for(i = 0; i < 2; i = i+1) {
+    for(j = 0; j < 2; j = j+1) {
+      c[i][j] = b[i][j] * a;
+    }
+  }
+  return c;
+}
+
+def float[2][2] scalar_mult_mat2f(float a, float[2][2] b) {
+  int i;
+  int j;
+  float[2][2] c;
+  for(i = 0; i < 2; i = i+1) {
+    for(j = 0; j < 2; j = j+1) {
+      c[i][j] = b[i][j] * a;
+    }
+  }
+  return c;
+}
+
+def int[3][3] scalar_mult_mat3i(int a, int[3][3] b) {
   int i;
   int j;
   int[3][3] c;
@@ -111,7 +135,7 @@ def int[3][3] scalar_mult_mati(int a, int[3][3] b) {
   return c;
 }
 
-def float[3][3] scalar_mult_matf(float a, float[3][3] b) {
+def float[3][3] scalar_mult_mat3f(float a, float[3][3] b) {
   int i;
   int j;
   float[3][3] c;
@@ -167,7 +191,7 @@ def int[3][3] mat_mat_addi(int[3][3] a, int[3][3] b) {
   int j;
   int[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] + b[i][j];
     }
   }
@@ -179,7 +203,7 @@ def float[3][3] mat_mat_addf(float[3][3] a, float[3][3] b) {
   int j;
   float[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] + b[i][j];
     }
   }
@@ -209,7 +233,7 @@ def int[3][3] mat_mat_subi(int[3][3] a, int[3][3] b) {
   int j;
   int[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] - b[i][j];
     }
   }
@@ -221,7 +245,7 @@ def float[3][3] mat_mat_subf(float[3][3] a, float[3][3] b) {
   int j;
   float[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][j] - b[i][j];
     }
   }
@@ -233,7 +257,7 @@ def int[3] vec_mat_multi(int[3] a, int[3][3] b) {
   int j;
   int[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[j] * b[j][i];
     }
   }
@@ -245,7 +269,7 @@ def float[3] vec_mat_multf(float[3] a, float[3][3] b) {
   int j;
   float[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[j] * b[j][i];
     }
   }
@@ -257,7 +281,7 @@ def int[3] mat_vec_multi(int[3][3] a, int[3] b) {
   int j;
   int[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[i][j] * b[j];
     }
   }
@@ -269,7 +293,7 @@ def float[3] mat_vec_multf(float[3][3] a, float[3] b) {
   int j;
   float[3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i] = c[i] + a[i][j] * b[j];
     }
   }
@@ -293,11 +317,144 @@ def float[3][3] mat_mat_multf(float[3][3] a, float[3][3] b) {
   int j;
   float[3][3] c;
   for(i = 0; i < 3; i = i+1) {
-    for(j = 0; j < 3; j = j+2) {
+    for(j = 0; j < 3; j = j+1) {
       c[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
     }
   }
   return c;
+}
+
+def int[3][3] mat_transposei(int[3][3] a) {
+	int i;
+	int j;
+	int[3][3] b;
+	for(i = 0; i < 3; i = i+1) {
+	    for(j = 0; j < 3; j = j+1) {
+	    	b[j][i] = a[i][j];
+	    }
+	}
+	return b;
+}
+
+def float[3][3] mat_transposef(float[3][3] a) {
+	int i;
+	int j;
+	float[3][3] b;
+	for(i = 0; i < 3; i = i+1) {
+	    for(j = 0; j < 3; j = j+1) {
+	    	b[j][i] = a[i][j];
+	    }
+	}
+	return b;
+}
+
+def float det_mat2(float[2][2] a) {
+	return a[0][0] * a[1][1] - a[1][0] * a[0][1];
+}
+
+def float det_mat3(float[3][3] a) {
+	float[2][2] b;
+	float[2][2] c;
+	float[2][2] d;
+
+	b[0][0] = a[1][1];
+	b[0][1] = a[1][2];
+	b[1][0] = a[2][1];
+	b[1][1] = a[2][2];
+
+	c[0][0] = a[1][0];
+	c[0][1] = a[1][2];
+	c[1][0] = a[2][0];
+	c[1][1] = a[2][2];
+
+	d[0][0] = a[1][0];
+	d[0][1] = a[1][1];
+	d[1][0] = a[2][0];
+	d[1][1] = a[2][1];
+
+	return a[0][0] * det_mat2(b) + a[0][1] * det_mat2(c) + a[0][2] * det_mat2(d);
+}
+
+def float[2][2] mat_inverse2(float[2][2] a) {
+    float[2][2] b;
+    b[0][0] = a[1][1];
+    b[0][1] = -a[0][1];
+    b[0][0] = -a[1][0];
+    b[0][0] = a[0][0];
+	return (1 / det_mat2(a)) * b;
+}
+
+def float[3][3] mat_inverse3(float[3][3] a) {
+	float[2][2] b11;
+	float[2][2] b12;
+	float[2][2] b13;
+	float[2][2] b21;
+	float[2][2] b22;
+	float[2][2] b23;
+	float[2][2] b31;
+	float[2][2] b32;
+	float[2][2] b33;
+	float[3][3] c;
+
+	b11[0][0] = a[1][1];
+	b11[0][1] = a[1][2];
+	b11[1][0] = a[2][1];
+	b11[1][1] = a[2][2];
+
+	b12[0][0] = a[0][2];
+	b12[0][1] = a[0][1];
+	b12[1][0] = a[2][2];
+	b12[1][1] = a[2][1];
+
+	b13[0][0] = a[0][1];
+	b13[0][1] = a[0][2];
+	b13[1][0] = a[1][1];
+	b13[1][1] = a[1][2];
+
+
+	b21[0][0] = a[1][2];
+	b21[0][1] = a[1][0];
+  b21[1][0] = a[2][2];
+  b21[1][1] = a[2][0];
+
+	b22[0][0] = a[0][0];
+	b22[0][1] = a[0][2];
+	b22[1][0] = a[2][0];
+	b22[1][1] = a[2][2];
+
+	b23[0][0] = a[0][2];
+	b23[0][1] = a[0][0];
+	b23[1][0] = a[1][2];
+	b23[1][1] = a[1][0];
+
+	b31[0][0] = a[1][0];
+	b31[0][1] = a[1][1];
+	b31[1][0] = a[2][0];
+	b31[1][1] = a[2][1];
+
+	b32[0][0] = a[0][1];
+	b32[0][1] = a[0][0]; 
+	b32[1][0] = a[2][1];
+	b32[1][1] = a[2][0];
+
+	b33[0][0] = a[0][0];
+	b33[0][1] = a[0][1];
+	b33[1][0] = a[1][0];
+	b33[1][1] = a[1][1];
+
+	c[0][0] = det_mat2(b11);
+	c[0][1] = det_mat2(b12);
+	c[0][2] = det_mat2(b13);
+
+	c[1][0] = det_mat2(b21);
+	c[1][1] = det_mat2(b22);
+	c[1][2] = det_mat2(b23);
+							
+	c[2][0] = det_mat2(b31);
+	c[2][1] = det_mat2(b32);
+	c[2][2] = det_mat2(b33);
+
+	return (1 / det_mat3(a)) * c;
 }
 
 def int[3] get_mat_rowi(int[3][3] a, int b) {
