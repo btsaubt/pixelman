@@ -1,6 +1,0 @@
-def int main(){
-    int a;
-    float b;
-    bool c;
-    return 0;
-}

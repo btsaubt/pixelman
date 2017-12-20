@@ -6,8 +6,10 @@ def int main(){
     int end;
     int temp;
     print_string("a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]");
+    print_newline();
     a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     print_arr(a);
+    print_newline();
     start = 0;
     end = sizeof(a) - 1;
     while (start < end && start!= end){
@@ -18,15 +20,25 @@ def int main(){
         end = end-1;
     }
     print_string("a reversed: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]");
+    print_newline();
     print_arr(a);
+    print_newline();
     print_string("c = [2, 5, 8]");
+    print_newline();
     c = [ 2, 5, 8 ];
     print_arr2(c);
+    print_newline();
     c = c*3;
     print_string("c = c*3 = [6, 15, 24]");
+    print_newline();
     print_arr2(c);
-    printb(2==1);
-    printb(2==2);
+    print_newline();
+    print_string("a[1]==2; a[8]==2");
+    print_newline();
+    printb(a[1]==2);
+    print_newline();
+    printb(a[8]==2);
+    print_newline();
     return 0;
 }
 
