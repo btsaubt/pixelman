@@ -61,11 +61,15 @@ let check (globals, functions) =
      { typ = Void; fname = "print_newline"; formals = [];
        locals = []; body = [] } (StringMap.add "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
+       locals = []; body = [] } (StringMap.add "inputPic"
+     { typ = Void; fname = "inputPic"; formals = [(Int, "x")];
+       locals = []; body = [] } (StringMap.add "makePic"
+     { typ = Void; fname = "makePic"; formals = [(Int, "x");(Int, "x");(Int, "x");(Int, "x");(Int, "x")];
        locals = []; body = [] } (StringMap.add "print_string"
      { typ = Void; fname = "print_string"; formals = [(String, "x")];
        locals = []; body = [] } (StringMap.singleton "print_float" 
      { typ = Void; fname = "print_float"; formals = [(Float, "x")];
-       locals = []; body = [] } )))))
+       locals = []; body = [] } )))))))
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
