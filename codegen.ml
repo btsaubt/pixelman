@@ -138,7 +138,6 @@ let translate (globals, functions) =
               L.const_array(array_t i32_t (List.length (List.hd ell))) array_of_arrays 
           | _ -> raise(Failure(A.string_of_typ t)) 
         )
-
       | S.SNoexpr -> L.const_int i32_t 0
       | S.SId (s, _) -> L.build_load (lookup s) s builder
       | S.SSizeOf(vm,_) -> L.const_int i32_t (L.array_length (L.element_type (L.type_of (lookup vm))))

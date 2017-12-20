@@ -153,8 +153,8 @@ let check (globals, functions) =
               Mult -> (match ta2 with 
                   Float -> SCall("scalar_mult_vecf", [se2; se1], Vector(Float, Int_Literal(i)))
                   | Int -> if tm1 == Float 
-                    then SCall("scalar_mult_veci", [se2; se1], Vector(Float, Int_Literal(i)))
-                    else SCall("scalar_mult_vecf", [se2; se1], Vector(Int, Int_Literal(i)))
+                    then SCall("scalar_mult_vecf", [se2; se1], Vector(Float, Int_Literal(i)))
+                    else SCall("scalar_mult_veci", [se2; se1], Vector(Int, Int_Literal(i)))
                   | Vector(tm2, _) -> if tm2 == Float || tm1 == Float 
                       then SCall("vec_dot_productf", [se2; se1], Float)
                       else SCall("vec_dot_producti", [se2; se1], Int)
@@ -276,6 +276,8 @@ let check (globals, functions) =
       | SizeOf(s) -> is_vec_matrix (type_of_identifier s); SSizeOf(s, Int)
       | VecAccess(v, e) -> check_int_expr e; check_vec_access_type v; SVecAccess(v, expr_to_sexpr e, access_type (type_of_identifier v))
       | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; check_mat_access_type v; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
+      | MatRow(s,e) -> check_int_expr e; check_mat_access_type s; get_mat_row_sexpr s e
+      | MatCol(s,e) -> check_int_expr e; check_mat_access_type s; get_mat_col_sexpr s e
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
@@ -329,6 +331,22 @@ let check (globals, functions) =
         Matrix(_,_,_) -> ()
         | _ -> raise(Failure("cannot perform matrix access on variable " ^ v))
 
+    and get_mat_row_sexpr v e =
+      let se = expr_to_sexpr e
+      in let t = type_of_identifier v 
+      in match t with
+        Matrix(Int,_,Int_Literal(j)) -> SCall("get_mat_rowi", [SId(v,t); se], Vector(Int,Int_Literal(j)))
+        | Matrix(Float,_,Int_Literal(j)) -> SCall("get_mat_rowf", [SId(v,t); se], Vector(Float,Int_Literal(j)))
+        | _ -> raise(Failure("cannot get row of non-matrix type"))
+
+
+    and get_mat_col_sexpr v e =
+      let se = expr_to_sexpr e
+      in let t = type_of_identifier v
+      in match t with
+        Matrix(Int,Int_Literal(i),_) -> SCall("get_mat_rowi", [SId(v,t); se], Vector(Int,Int_Literal(i)))
+        | Matrix(Float,Int_Literal(i),_) -> SCall("get_mat_rowf", [SId(v,t); se], Vector(Float,Int_Literal(i)))
+        | _ -> raise(Failure("cannot get row of non-matrix type"))
 
     (* only gets type of vector; does not go through whole vector all the time *)
     and get_vec_type el = match el with

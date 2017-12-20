@@ -25,8 +25,8 @@ type expr =
   | Call of string * expr list
   | VecAccess of string * expr
   | MatAccess of string * expr * expr
-  | MatRow of string * sexpr
-  | MatCol of string * sexpr
+  | MatRow of string * expr
+  | MatCol of string * expr
   | SizeOf of string
   | Noexpr
 
@@ -117,8 +117,8 @@ and(* rec *) string_of_expr = function
   | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
   | MatAccess(v, e1, e2) -> v ^ "[" ^ string_of_expr e1 ^ "]" ^ 
                                 "[" ^ string_of_expr e2 ^ "]"
-  | MatRow(v, e) -> v ^ "[" ^ string_of_expr e ^ ",]"
-  | MatCol(v, e) -> v ^ "[," ^ string_of_expr e ^ "]"
+  | MatRow(v, e) -> v ^ "[" ^ string_of_expr e ^ "][]"
+  | MatCol(v, e) -> v ^ "[][" ^ string_of_expr e ^ "]"
   | Noexpr -> ""
 
 let rec string_of_stmt = function

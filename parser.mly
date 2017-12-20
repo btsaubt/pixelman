@@ -102,11 +102,10 @@ mat_t:
 */
 
 vec_t:
-   typ LBRACKET expr_opt RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
+   typ LBRACKET expr RBRACKET %prec NOVECLBRACKET { Vector($1, $3) }
 
-   
 mat_t:
-   typ LBRACKET expr_opt RBRACKET LBRACKET expr_opt RBRACKET { Matrix($1, $3, $6) }
+   typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
 
 im_t:
    IMAGE LBRACKET expr COMMA expr RBRACKET { Image($3, $5) }
@@ -164,8 +163,8 @@ expr:
   | LPAREN expr RPAREN { $2 }
   | ID LBRACKET expr RBRACKET { VecAccess($1, $3) }
   | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
-  | ID LBRACKET expr RBRACKET LBRACKET RBRACKET {  }
-  | ID LBRACKET RBRACKET expr RBRACKET {}
+  | ID LBRACKET expr RBRACKET LBRACKET RBRACKET { MatRow($1, $3) }
+  | ID LBRACKET RBRACKET LBRACKET expr RBRACKET { MatCol($1, $5) }
 
 
 primitive_literals:
