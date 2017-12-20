@@ -164,8 +164,8 @@ let check (globals, functions) =
                       then SCall("vec_dot_productf", [se2; se1], Float)
                       else SCall("vec_dot_producti", [se2; se1], Int)
                   | Matrix(tm2, _, Int_Literal(j2)) -> if tm2 == Float || tm1 == Float 
-                          then SCall("vec_mat_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j2)))
-                          else SCall("vec_mat_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j2)))
+                          then SCall("vec_mat_multf", [se1; se2], Vector(Float, Int_Literal(j2)))
+                          else SCall("vec_mat_multi", [se1; se2], Vector(Int, Int_Literal(j2)))
                   | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
               )
               | Sub -> (match ta2 with 
@@ -175,8 +175,8 @@ let check (globals, functions) =
                       | _ -> raise (Failure ("oh no! can only perform this operation on vector of same length.")))
               | Add -> (match ta2 with 
                     Vector(tm2, Int_Literal(i)) -> if tm2 == Float || tm1 == Float 
-                      then SCall("vec_addf", [se1; se2], Vector(Float, Int_Literal(i)))
-                      else SCall("vec_addi", [se1; se2], Vector(Int, Int_Literal(i)))
+                      then SCall("vec_vec_addf", [se1; se2], Vector(Float, Int_Literal(i)))
+                      else SCall("vec_vec_addi", [se1; se2], Vector(Int, Int_Literal(i)))
                     | _ -> raise (Failure ("oh no! can only perform this operation on vector of same length.")))
               | _ -> raise (Failure ("oh no! cannot perform this operation on matrix.")))
         | (Matrix(tm1, Int_Literal(i), Int_Literal(j)), ta2) -> (match op with
@@ -186,8 +186,8 @@ let check (globals, functions) =
                         then SCall("scalar_mult_matf", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
                         else SCall("scalar_mult_mati", [se2; se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
                       | Vector(tm2, _)  -> if tm2 == Float || tm1 == Float  
-                          then SCall("mat_vec_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(1)))
-                          else SCall("mat_vec_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(1)))
+                          then SCall("mat_vec_multf", [se1; se2], Vector(Float, Int_Literal(i)))
+                          else SCall("mat_vec_multi", [se1; se2], Vector(Int, Int_Literal(i)))
                       | Matrix(tm2, _, Int_Literal(j2)) -> if tm2 == Float || tm1 == Float 
                           then SCall("mat_mat_multf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j2)))
                           else SCall("mat_mat_multi", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j2)))
@@ -309,7 +309,7 @@ let check (globals, functions) =
              (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
          else
             SCall(fname,List.map2 (fun (ft, _) e -> let se = 
-              let e' = expr_to_sexpr e 
+              let e' = expr_to_sexpr e (* some implicit int -> float conversion done here *)
               in let et2 = get_sexpr_type e'
               in match ft with
                 Float -> if get_sexpr_type e' == Int then SUnop(FloatCast, e', Float) else e'
@@ -364,8 +364,8 @@ let check (globals, functions) =
       let se = expr_to_sexpr e
       in let t = type_of_identifier v
       in match t with
-        Matrix(Int,Int_Literal(i),_) -> SCall("get_mat_rowi", [SId(v,t); se], Vector(Int,Int_Literal(i)))
-        | Matrix(Float,Int_Literal(i),_) -> SCall("get_mat_rowf", [SId(v,t); se], Vector(Float,Int_Literal(i)))
+        Matrix(Int,Int_Literal(i),_) -> SCall("get_mat_coli", [SId(v,t); se], Vector(Int,Int_Literal(i)))
+        | Matrix(Float,Int_Literal(i),_) -> SCall("get_mat_colf", [SId(v,t); se], Vector(Float,Int_Literal(i)))
         | _ -> raise(Failure("cannot get row of non-matrix type"))
 
     (* only gets type of vector; does not go through whole vector all the time *)
