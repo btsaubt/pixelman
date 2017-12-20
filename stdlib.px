@@ -29,7 +29,7 @@ def void print_veci(int[3] a) {
 
 }
 
-def void print_veci(float[3] a) { 
+def void print_vecf(float[3] a) { 
   int i; 
 
   for(i = 0; i < 3; i = i+1) { 
