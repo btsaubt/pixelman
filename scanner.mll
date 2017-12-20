@@ -89,7 +89,7 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
-| "Image"  { IMAGE }
+(*| "Image"  { IMAGE }*)
 | "sizeof" { SIZEOF }
 
 (* Literals *)

@@ -27,7 +27,7 @@ let translate (globals, functions) =
   let int_lit_to_int = function
     A.Int_Literal(i) -> i | _ -> raise(Failure("Can only make vector/matrix of dimension int literal"))
   in
-  let rec ltype_of_typ = function
+  let ltype_of_typ = function
       A.Int -> i32_t
     | A.Float -> f_t
     | A.Bool -> i1_t
@@ -42,8 +42,8 @@ let translate (globals, functions) =
                           A.Int -> array_t (array_t i32_t (int_lit_to_int s2)) (int_lit_to_int s1)
                             | A.Float -> array_t (array_t f_t (int_lit_to_int s2)) (int_lit_to_int s1)
                             | _ -> raise(Failure("Cannot only make vector of type int/float")))
-(*     | A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w))
-                      in array_t mat_t 3 (* make an array of 3 h x w matrices *) *)
+    (*| A.Image(h,w) -> let mat_t = ltype_of_typ (A.Matrix(A.Int, h, w))
+                      in array_t mat_t 3 (* make an array of 3 h x w matrices *)*)
   in
   (* Declare each global variable; remember its value in a map *)
   let global_vars =

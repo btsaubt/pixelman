@@ -13,7 +13,7 @@ open Ast
 %token LMATBRACK RMATBRACK
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT INTCAST FLOATCAST
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR IMAGE SIZEOF
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID DEF STRING CHAR SIZEOF /*IMAGE*/ 
 
 %token NOVECLBRACKET
 %token BREAK CONTINUE
@@ -81,7 +81,7 @@ typ:
   | CHAR { Char } 
   | STRING { String } 
   | VOID { Void } 
-  | im_t { $1 }
+  /*| im_t { $1 }*/
   | vec_t { $1 } 
   | mat_t { $1 }
 
@@ -98,8 +98,8 @@ vec_t:
 mat_t:
    typ LBRACKET expr RBRACKET LBRACKET expr RBRACKET { Matrix($1, $3, $6) }
 
-im_t:
-   IMAGE LBRACKET expr COMMA expr RBRACKET %prec NOVECLBRACKET { Image($3, $5) }
+/*im_t:
+   IMAGE LBRACKET expr COMMA expr RBRACKET %prec NOVECLBRACKET { Image($3, $5) }*/
 
 
 stmt_list:
@@ -156,7 +156,7 @@ expr:
   | ID LBRACKET expr RBRACKET LBRACKET expr RBRACKET { MatAccess($1, $3, $6) } 
   | ID LBRACKET expr RBRACKET LBRACKET RBRACKET { MatRow($1, $3) }
   | ID LBRACKET RBRACKET LBRACKET expr RBRACKET { MatCol($1, $5) }
-  | ID DOT LBRACKET INT_LITERAL RBRACKET { ImAccess($1, $4) }
+  /*| ID DOT LBRACKET INT_LITERAL RBRACKET { ImAccess($1, $4) }*/
 
 
 primitive_literals:
