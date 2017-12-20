@@ -29,8 +29,8 @@ rule token = parse
 | "]"      { RBRACKET } 
 | "[|"     { LMATBRACK } 
 | "|]"     { RMATBRACK } 
-(*| ':'      { COLON }
-| "."      { DOT } *)
+(*| ':'      { COLON } *)
+| "."      { DOT } 
 
 	(* Assignment Operators *)
 | '='      { ASSIGN }
