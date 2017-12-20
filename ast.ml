@@ -118,12 +118,9 @@ and(* rec *) string_of_expr = function
   | VecAccess(v, e) -> v ^ "[" ^ string_of_expr e ^ "]"
   | MatAccess(v, e1, e2) -> v ^ "[" ^ string_of_expr e1 ^ "]" ^ 
                                 "[" ^ string_of_expr e2 ^ "]"
-<<<<<<< HEAD
   | MatRow(v, e) -> v ^ "[" ^ string_of_expr e ^ "][]"
   | MatCol(v, e) -> v ^ "[][" ^ string_of_expr e ^ "]"
-=======
   | ImAccess(v, c) -> v ^ ".[" ^ string_of_int c ^ "]"
->>>>>>> gabe
   | Noexpr -> ""
 
 let rec string_of_stmt = function
