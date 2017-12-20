@@ -265,14 +265,18 @@ let check (globals, functions) =
         | (Char, Char) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only compare ints/floats/chars with themselves for equality"))
 
-    (*and check_image_accessor ia ty = 
-	if ia == 0 || ia==1 || ia==2 then ignore(ia)
-	else raise (Failure ("can only access 0, 1, or 2"))
-	in
-	match ty with
+    and check_image_accessor ia = 
+	match ia with
+	0 -> ()
+	| 1 -> ()
+	| 2 -> ()
+	| _ -> raise (Failure ("can only access 0, 1, or 2"))
+    
+    and check_is_image id = 
+	let idd = type_of_identifier id in
+	match idd with
 	Image(_,_) -> ()
-	| _ -> raise (Failure ("can only access images")) 
-	*)
+	| _ -> raise (Failure ("can only access images"))
 	
     in
 
@@ -291,7 +295,7 @@ let check (globals, functions) =
       | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; check_mat_access_type v; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
       | MatRow(s,e) -> check_int_expr e; check_mat_access_type s; get_mat_row_sexpr s e
       | MatCol(s,e) -> check_int_expr e; check_mat_access_type s; get_mat_col_sexpr s e
-      | ImAccess(idd, color) -> SImAccess(idd,color,(type_of_identifier idd))
+      | ImAccess(idd, color) -> ignore(check_image_accessor color); ignore(check_is_image idd); SImAccess(idd,color,(type_of_identifier idd))
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
