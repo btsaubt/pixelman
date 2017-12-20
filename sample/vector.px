@@ -25,6 +25,8 @@ def int main(){
     c = c*3;
     print_string("c = c*3 = [6, 15, 24]");
     print_arr2(c);
+    printb(2==1);
+    printb(2==2);
     return 0;
 }
 
