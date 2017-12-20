@@ -66,6 +66,9 @@ let translate (globals, functions) =
   let makePic_t = L.function_type i32_t [| i32_t; i32_t; i32_t; i32_t; i32_t|] in
   let makePic_func = L.declare_function "makePic" makePic_t the_module in
 
+  let inputPic_t = L.function_type i32_t [| i32_t|] in
+  let inputPic_func = L.declare_function "inputPic" inputPic_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -237,6 +240,8 @@ let translate (globals, functions) =
 	        L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | S.SCall ("makePic", [e;e1;e2;e3;e4], _) ->
           L.build_call makePic_func [| (expr builder e);(expr builder e1);(expr builder e2);(expr builder e3);(expr builder e4) |] "makePic" builder
+      | S.SCall ("inputPic", [e], _) ->
+          L.build_call inputPic_func [| (expr builder e) |] "inputPic" builder
       | S.SCall (f, act, _) ->
         let (fdef, fdecl) = StringMap.find f function_decls in
            let actuals = List.rev (List.map (expr builder) (List.rev act)) in
