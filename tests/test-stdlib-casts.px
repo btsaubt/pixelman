@@ -1,0 +1,16 @@
+def int main() { 
+  (: Tests matrix integers to floats :) 
+  int[3][3] a; 
+  float[3][3] b; 
+  
+  a = $int [| [1.0, 2.0, 3.0] 
+              &  [4.0, 5.0, 6.0] 
+              &  [7.0, 8.0, 9.0] |]; 
+  
+  b = $float [| [1, 2, 3]
+             &  [4, 5, 6] 
+             &  [7, 8, 9] |]; 
+
+  print_mati(a); 
+  print_matf(b); 
+} 
