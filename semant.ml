@@ -58,7 +58,7 @@ let check (globals, functions) =
        locals = []; body = [] } (StringMap.add "printb"
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
        locals = []; body = [] } (StringMap.add "makePic"
-     { typ = Void; fname = "makePic"; formals = [(Int, "x"); (Int, "y");(Int, "z");(Int, "w")];
+     { typ = Void; fname = "makePic"; formals = [(Int, "x"); (Int, "y");(Int, "z");(Int, "w");(Int, "v")];
        locals = []; body = [] } (StringMap.add "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "print_string"

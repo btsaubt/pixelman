@@ -1,5 +1,5 @@
 def int main()
 {
-	makePic(200,4,4,4);
+	makePic(200,200, 30,250,30);
 	return 0;
 }
