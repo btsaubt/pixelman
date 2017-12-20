@@ -178,7 +178,7 @@ let check (globals, functions) =
                       then SCall("vec_vec_addf", [se1; se2], Vector(Float, Int_Literal(i)))
                       else SCall("vec_vec_addi", [se1; se2], Vector(Int, Int_Literal(i)))
                     | _ -> raise (Failure ("oh no! can only perform this operation on vector of same length.")))
-              | _ -> raise (Failure ("oh no! cannot perform this operation on matrix.")))
+              | _ -> raise (Failure ("oh no! cannot perform this operation on vector.")))
         | (Matrix(tm1, Int_Literal(i), Int_Literal(j)), ta2) -> (match op with
               Mult -> (match ta2 with (* matrix x ta2 check *)
                       Float -> SCall("scalar_mult_matf", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
