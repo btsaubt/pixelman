@@ -181,10 +181,15 @@ let check (globals, functions) =
               | _ -> raise (Failure ("oh no! cannot perform this operation on vector.")))
         | (Matrix(tm1, Int_Literal(i), Int_Literal(j)), ta2) -> (match op with
               Mult -> (match ta2 with (* matrix x ta2 check *)
-                      Float -> SCall("scalar_mult_matf", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                      | Int -> if tm1 == Float 
-                        then SCall("scalar_mult_matf", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
-                        else SCall("scalar_mult_mati", [se2; se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                      Float -> if i == 3 then
+                        SCall("scalar_mult_mat3f", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                        else SCall("scalar_mult_mat2f", [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+                      | Int -> 
+                        let sc_mat_f_fname = if i == 2 then "scalar_mult_mat2f" else "scalar_mult_mat3f" in
+                        let sc_mat_i_fname = if i == 2 then "scalar_mult_mat2i" else "scalar_mult_mat3i" in
+                        if tm1 == Int
+                          then SCall(sc_mat_i_fname, [se2; se1], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+                          else SCall(sc_mat_f_fname, [se2; se1], Matrix(Float, Int_Literal(i), Int_Literal(j)))
                       | Vector(tm2, _)  -> if tm2 == Float || tm1 == Float  
                           then SCall("mat_vec_multf", [se1; se2], Vector(Float, Int_Literal(i)))
                           else SCall("mat_vec_multi", [se1; se2], Vector(Int, Int_Literal(i)))
@@ -205,8 +210,16 @@ let check (globals, functions) =
               | _ -> raise (Failure ("oh no! cannot perform this operation on matrix.") ))
         | (Int, Vector(Int,Int_Literal(i))) -> SCall("scalar_mult_veci", [se1; se2], Vector(Int, Int_Literal(i)))
         | (Float, Vector(Int,Int_Literal(i))) | (Int, Vector(Float,Int_Literal(i))) | (Float, Vector(Float,Int_Literal(i))) -> SCall("scalar_mult_vecf", [se1; se2], Vector(Float, Int_Literal(i)))
-        | (Int, Matrix(Int,Int_Literal(i),Int_Literal(j))) -> SCall("scalar_mult_mati", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
-        | (Float, Matrix(Int,Int_Literal(i),Int_Literal(j))) | (Int, Matrix(Float,Int_Literal(i),Int_Literal(j))) | (Float, Matrix(Float,Int_Literal(i),Int_Literal(j))) -> SCall("scalar_mult_matf", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+        | (Int, Matrix(Int,Int_Literal(i),Int_Literal(j))) -> 
+            if i == 2 then SCall("scalar_mult_mat2i", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+            else SCall("scalar_mult_mat3i", [se1; se2], Matrix(Int, Int_Literal(i), Int_Literal(j)))
+        | (Float, Matrix(Int,Int_Literal(i),Int_Literal(j))) -> if i == 2 then SCall("scalar_mult_mat2f", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+            else SCall("scalar_mult_mat3f", [se1; SCall("mat_int_to_float", [se2], Matrix(Float,Int_Literal(i),Int_Literal(j)))], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+        | (Int, Matrix(Float,Int_Literal(i),Int_Literal(j))) -> if i == 2 then SCall("scalar_mult_mat2f", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+            else SCall("scalar_mult_mat3f", [SUnop(FloatCast, se1, Float); se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+        | (Float, Matrix(Float,Int_Literal(i),Int_Literal(j))) -> if i == 2 then SCall("scalar_mult_mat2f", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+            else SCall("scalar_mult_mat3f", [se1; se2], Matrix(Float, Int_Literal(i), Int_Literal(j)))
+
         | _ -> raise (Failure ("can only perform binary arithmetic operators with Int/Float variables or matrices"))
 
     and get_unop_arithmetic_sexpr se op = 
@@ -315,11 +328,11 @@ let check (globals, functions) =
                 Float -> if get_sexpr_type e' == Int then SUnop(FloatCast, e', Float) else e'
                 | Vector(Float,_) -> (match et2 with
                     Vector(Float,_) -> e'
-                  | Vector(Int,Int_Literal(i))   -> SUnop(FloatCast, e', Vector(Float,Int_Literal(i)))
+                  | Vector(Int,Int_Literal(i))   -> (expr_to_sexpr (Unop(FloatCast, e)))
                   | _                            -> raise (Failure("can only have vector of int/float")))
                 | Matrix(Float,_,_) -> (match et2 with
                     Matrix(Float,_,_) -> e'
-                  | Matrix(Int,Int_Literal(i),Int_Literal(j)) -> SUnop(FloatCast, e', Matrix(Float,Int_Literal(i),Int_Literal(j)))
+                  | Matrix(Int,Int_Literal(i),Int_Literal(j)) -> (expr_to_sexpr (Unop(FloatCast, e)))
                   | _                            -> raise (Failure("can only have vector of int/float")))
                 | _ -> e'
             in
@@ -450,9 +463,13 @@ let check (globals, functions) =
       let rt = get_sexpr_type se2 in
       match lt with 
       Vector(_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
-        | Matrix(_,_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
+        | Matrix(Int,_,_) -> if compare_vector_matrix_type lt rt then SAssign(se1,se2,lt) else raise (Failure ("illegal assignment "))
+        | Matrix(Float,_,_) -> if compare_vector_matrix_type lt rt then (match rt with
+            Matrix(Int,_,_) -> SAssign(se1,expr_to_sexpr (Unop(FloatCast, e2)),lt)
+            | _ -> (SAssign(se1,se2,lt)))
+          else raise (Failure ("illegal assignment "))
         | _ -> if lt == Float && rt == Int
-               then SAssign(se1, SUnop(FloatCast, se2, Float), Float)
+               then SAssign(se1, (expr_to_sexpr (Unop(FloatCast, e2))), Float)
                else (if lt == rt then SAssign(se1,se2,lt) 
                        else raise (Failure ("illegal assignment " ^
                        string_of_typ lt ^ " = " ^ string_of_typ rt ^ 
