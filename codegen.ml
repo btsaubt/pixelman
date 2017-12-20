@@ -63,6 +63,9 @@ let translate (globals, functions) =
   let printbig_t = L.function_type i32_t [| i32_t |] in
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
+  let makePic_t = L.function_type void_t [| |] in
+  let makePic_func = L.declare_function "makePic" makePic_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -232,6 +235,8 @@ let translate (globals, functions) =
                 "print_float" builder
       | S.SCall ("printbig", [e], _) ->
 	        L.build_call printbig_func [| (expr builder e) |] "printbig" builder
+      | S.SCall ("makePic", [], _) ->
+          L.build_call makePic_func [| |] "makePic" builder
       | S.SCall (f, act, _) ->
         let (fdef, fdecl) = StringMap.find f function_decls in
            let actuals = List.rev (List.map (expr builder) (List.rev act)) in
