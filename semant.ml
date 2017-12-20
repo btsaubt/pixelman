@@ -57,17 +57,15 @@ let check (globals, functions) =
      { typ = Void; fname = "print_int"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "printb"
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
-       locals = []; body = [] } (StringMap.add "makePic"
-     { typ = Void; fname = "makePic"; formals = [(Int, "x"); (Int, "y");(Int, "z");(Int, "w");(Int, "v")];
-       locals = []; body = [] } (StringMap.add "inputPic"
-     { typ = Void; fname = "inputPic"; formals = [(Int, "x")];
+       locals = []; body = [] } (StringMap.add "print_newline"
+     { typ = Void; fname = "print_newline"; formals = [];
        locals = []; body = [] } (StringMap.add "printbig"
      { typ = Void; fname = "printbig"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "print_string"
      { typ = Void; fname = "print_string"; formals = [(String, "x")];
        locals = []; body = [] } (StringMap.singleton "print_float" 
      { typ = Void; fname = "print_float"; formals = [(Float, "x")];
-       locals = []; body = [] } ))))))
+       locals = []; body = [] } )))))
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -127,7 +125,7 @@ let check (globals, functions) =
         | SAssign(_,_,t) -> t
         | SVecAccess(_,_,t) -> t
         | SMatAccess(_,_,_,t) -> t
-	| SImAccess(_,_,t) -> t
+	(* | SImAccess(_,_,t) -> t *)
         | SCall(_,_,t) -> t
         | SSizeOf(_,t) -> t
         | SNoexpr -> Void
