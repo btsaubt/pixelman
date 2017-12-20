@@ -2,8 +2,8 @@
  
 void inputPic(int wedfwe)
 {
-  int pix_x=400,pix_y=300;    // image dimns in pixels
-  static int image[400][300][4]; // first [] number here is total pixels of each color in
+  int pix_x=300,pix_y=300;    // image dimns in pixels
+  static int image[300][300][4]; // first [] number here is total pixels of each color in
                               // my image, 3 is for //RGB values
   FILE *streamIn;
   // //opening 24bit image
