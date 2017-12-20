@@ -127,7 +127,7 @@ let check (globals, functions) =
         | SAssign(_,_,t) -> t
         | SVecAccess(_,_,t) -> t
         | SMatAccess(_,_,_,t) -> t
-	| SImAccess(_,_,t) -> t
+        (*| SImAccess(_,_,t) -> t*)
         | SCall(_,_,t) -> t
         | SSizeOf(_,t) -> t
         | SNoexpr -> Void
@@ -280,18 +280,19 @@ let check (globals, functions) =
         | (Char, Char) -> SBinop(se1, op, se2, Bool)
         | _ -> raise (Failure ("can only compare ints/floats/chars with themselves for equality"))
 
-    and check_image_accessor ia = 
+    (*and check_image_accessor ia = 
 	match ia with
 	0 -> ()
 	| 1 -> ()
 	| 2 -> ()
-	| _ -> raise (Failure ("can only access 0, 1, or 2"))
+	| _ -> raise (Failure ("can only access 0, 1, or 2"))*)
     
-    and check_is_image id = 
+    (*and check_is_image id = 
 	let idd = type_of_identifier id in
 	match idd with
 	Image(_,_) -> ()
 	| _ -> raise (Failure ("can only access images"))
+    *)
 	
     in
 
@@ -310,7 +311,7 @@ let check (globals, functions) =
       | MatAccess(v, e1, e2) ->  check_int_expr e1; check_int_expr e2; check_mat_access_type v; SMatAccess(v, expr_to_sexpr e1, expr_to_sexpr e2, access_type (type_of_identifier v))
       | MatRow(s,e) -> check_int_expr e; check_mat_access_type s; get_mat_row_sexpr s e
       | MatCol(s,e) -> check_int_expr e; check_mat_access_type s; get_mat_col_sexpr s e
-      | ImAccess(idd, color) -> ignore(check_image_accessor color); ignore(check_is_image idd); SImAccess(idd,color,(type_of_identifier idd))
+      (*| ImAccess(idd, color) -> ignore(check_image_accessor color); ignore(check_is_image idd); SImAccess(idd,color,(type_of_identifier idd))*)
       | Binop(e1, op, e2) (* as e *) -> get_binop_sexpr e1 e2 op
       | Unop(op, e) (* as ex *) -> get_unop_sexpr op e
       | Noexpr -> SNoexpr
@@ -328,11 +329,11 @@ let check (globals, functions) =
                 Float -> if get_sexpr_type e' == Int then SUnop(FloatCast, e', Float) else e'
                 | Vector(Float,_) -> (match et2 with
                     Vector(Float,_) -> e'
-                  | Vector(Int,Int_Literal(i))   -> (expr_to_sexpr (Unop(FloatCast, e)))
+                  | Vector(Int,Int_Literal(_))   -> (expr_to_sexpr (Unop(FloatCast, e)))
                   | _                            -> raise (Failure("can only have vector of int/float")))
                 | Matrix(Float,_,_) -> (match et2 with
                     Matrix(Float,_,_) -> e'
-                  | Matrix(Int,Int_Literal(i),Int_Literal(j)) -> (expr_to_sexpr (Unop(FloatCast, e)))
+                  | Matrix(Int,Int_Literal(_),Int_Literal(_)) -> (expr_to_sexpr (Unop(FloatCast, e)))
                   | _                            -> raise (Failure("can only have vector of int/float")))
                 | _ -> e'
             in
@@ -523,7 +524,7 @@ let check (globals, functions) =
         if (t1 != Float) && (t1 != Int)
         then raise(Failure("can only have vectors/matrices of ints/floats"))
         else (); (t, id)
-      | Image(h,w) -> check_int_literal_expr h; check_int_literal_expr w; (t, id)
+      (*| Image(h,w) -> check_int_literal_expr h; check_int_literal_expr w; (t, id)*)
     in
 
     let check_formal_bind (t, id) = match t with

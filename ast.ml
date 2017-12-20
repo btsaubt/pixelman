@@ -28,7 +28,7 @@ type expr =
   | MatRow of string * expr
   | MatCol of string * expr
   | SizeOf of string
-  | ImAccess of string * int
+  (*| ImAccess of string * int*)
   | Noexpr
 
 type typ = 
@@ -38,7 +38,7 @@ type typ =
    | Char 
    | String 
    | Void 
-   | Image of expr * expr 
+   (*| Image of expr * expr *)
    | Vector of typ * expr 
    | Matrix of typ * expr * expr
 
@@ -120,7 +120,7 @@ and(* rec *) string_of_expr = function
                                 "[" ^ string_of_expr e2 ^ "]"
   | MatRow(v, e) -> v ^ "[" ^ string_of_expr e ^ "][]"
   | MatCol(v, e) -> v ^ "[][" ^ string_of_expr e ^ "]"
-  | ImAccess(v, c) -> v ^ ".[" ^ string_of_int c ^ "]"
+  (*| ImAccess(v, c) -> v ^ ".[" ^ string_of_int c ^ "]"*)
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -145,7 +145,7 @@ let rec string_of_typ = function
   | Float -> "float"
   | String -> "string"
   | Void -> "void"
-  | Image(h, w) -> "Image[" ^ string_of_expr h ^ "," ^ string_of_expr w ^ "]"
+  (*| Image(h, w) -> "Image[" ^ string_of_expr h ^ "," ^ string_of_expr w ^ "]"*)
   | Vector(t, e) -> string_of_typ t ^ "[" ^ string_of_expr e ^ "]"
   | Matrix(t, e1, e2) -> string_of_typ t ^ "[" ^ string_of_expr e1 ^ "][" ^ string_of_expr e2 ^ "]"
 
