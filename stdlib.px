@@ -269,6 +269,37 @@ def float[3][3] mat_mat_multf(float[3][3] a, float[3][3] b) {
   return c;
 }
 
+def int[3][3] mat_transposei(int[3][3] a) {
+	int i;
+	int j;
+	int[3][3] b;
+	for(i = 0; i < 3; i = i+1) {
+	    for(j = 0; j < 3; j = j+2) {
+	    	b[j][i] = a[i][j];
+	    }
+	}
+	return b;
+}
+
+def float[3][3] mat_transposef(float[3][3] a) {
+	int i;
+	int j;
+	float[3][3] b;
+	for(i = 0; i < 3; i = i+1) {
+	    for(j = 0; j < 3; j = j+2) {
+	    	b[j][i] = a[i][j];
+	    }
+	}
+	return b;
+}
+
+def float det_mat2(float[2][2] a) {
+	return a[0][0] * a[1][1] - a[1][0] * a[0][1];
+}
+
+def float det_mat3(float[3][3] a) {
+	return a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) - a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) + a[0][2] * (a[1][1] * a[2][0] - a[1][2] * a[2][0]);
+}
 def int[3] get_mat_rowi(int[3][3] a, int b) {
   int[3] ret;
   int i;
