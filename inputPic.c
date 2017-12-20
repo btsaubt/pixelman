@@ -48,8 +48,3 @@ void inputPic(int wedfwe)
   }
   (void) fclose(fp);
 }
-
-int main(){
-  inputPic(1);
-  return 0;
-}
