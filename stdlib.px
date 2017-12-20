@@ -18,7 +18,38 @@ def float[3][3] mat_int_to_float(int[3][3] a) {
   }
   return b; 
 } 
- 
+
+def void print_veci(int[3] a) { 
+  int i; 
+
+  for(i = 0; i < 3; i = i+1) { 
+    print_int(a[i]); 
+  } 
+
+} 
+
+def void print_mati(int[3][3] a) { 
+  int i; 
+  int j; 
+
+  for(i = 0; i < 3; i = i+1) { 
+    for(j = 0; j < 3; j = j+1) { 
+      print_int(a[i][j]); 
+    } 
+  } 
+} 
+
+def void print_matf(float[3][3] a) { 
+  int i; 
+  int j; 
+
+  for(i = 0; i < 3; i = i+1) { 
+    for(j = 0; j < 3; j = j+1) { 
+      print_float(a[i][j]); 
+    }
+  } 
+} 
+
 def int[3][3] mat_float_to_int(float[3][3] a) { 
   int i;
   int j; 
