@@ -8,29 +8,35 @@ def int main(){
     c = 2;
     d = 1;
     a = [| [1, 2, 3] & [4, 5, 6] & [7, 8, 9] |];
-    print_string("a = [| [1,2,3] & [4,5,6] & [7,8,9] |]");
+    :) print_string("a = [| [1,2,3] & [4,5,6] & [7,8,9] |]");
     print_newline();
+     
+    print_string("array");
+    print_newline(); 
+    print_mati(a); 
+    print_newline(); 
 
-    print_string("a[0][0]:");
-    print_newline();
+    print_string("a[0][0] = ");
+    :) print_newline();
     print_int(a[0][0]);
     print_newline();
+    print_newline(); 
 
-    print_string("c = 2, d = 1, a[c][d] = 8");
-    print_newline();
+    print_string("c = 2, d = 1, a[c][d] = ");
     print_int(a[c][d]);
     print_newline();
 
     print_string("sizeof(a):");
-    print_newline();
+    :) print_newline();
     print_int(sizeof(a));
     print_newline();
 
     b = a[0][];
     print_string("b = a[0][], sizeof(b):");
-    print_newline();
+    :) print_newline();
     print_int(sizeof(b));
     print_newline();
+    print_newline(); 
 
     print_string("print a:");
     print_newline();
@@ -48,10 +54,6 @@ def int main(){
     print_matf(e);
     print_newline();
 
-    print_string("print a * a^-1:");
-    print_newline();
-    print_matf(($float a)*e);
-    print_newline();
     return 0;
 }
 
