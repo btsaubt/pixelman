@@ -29,7 +29,6 @@ open Ast
 %nonassoc ELSE
 %nonassoc NOVECLBRACKET
 %nonassoc LMATBRACK
-%nonassoc LBRACKET
 %nonassoc DOT
 %right ASSIGN
 %left OR
@@ -44,6 +43,7 @@ open Ast
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 %right NOT NEG
+%nonassoc LBRACKET
 
 %start program
 %type <Ast.program> program
